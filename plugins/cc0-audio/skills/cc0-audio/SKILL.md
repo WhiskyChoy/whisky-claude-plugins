@@ -36,6 +36,14 @@ Verify FFmpeg is installed:
 ffmpeg -version
 ```
 
+**Windows note:** On Windows with Git Bash, if `bun link` doesn't work, run directly:
+```bash
+# Find your Bun path:
+where bun  # (cmd) or: ls /c/Users/*/AppData/Local/Microsoft/WinGet/Packages/Oven-sh.Bun*/bun-windows-x64/bun.exe
+# Then run directly:
+/path/to/bun.exe run ~/tools/cc0-audio/src/cli.ts search "query"
+```
+
 ## Quick Reference
 
 ```bash

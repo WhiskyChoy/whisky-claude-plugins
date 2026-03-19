@@ -35,8 +35,18 @@ If `bun link` fails or the command is not found after linking, fall back to:
 mkdir -p ~/.local/bin
 ln -sf ~/tools/lyria/src/cli.ts ~/.local/bin/lyria
 # Then ensure ~/.local/bin is on PATH:
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+# macOS/Linux (zsh):
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+# Windows (Git Bash):
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+**Windows note:** On Windows with Git Bash, use the full Bun path instead of `bun`:
+```bash
+# Find your Bun path:
+where bun  # (cmd) or: ls /c/Users/*/AppData/Local/Microsoft/WinGet/Packages/Oven-sh.Bun*/bun-windows-x64/bun.exe
+# Then run directly:
+/path/to/bun.exe run ~/tools/lyria/src/cli.ts "your prompt"
 ```
 
 Get a Gemini API key at: https://aistudio.google.com/apikey
