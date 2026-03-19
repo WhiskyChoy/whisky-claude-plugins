@@ -1,0 +1,7 @@
+{
+  "name": "lyria-audio",
+  "description": "AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output.",
+  "author": {
+    "name": "whisky"
+  }
+}

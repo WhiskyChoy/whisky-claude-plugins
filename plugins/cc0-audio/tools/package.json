@@ -1,0 +1,9 @@
+{
+  "name": "cc0-audio",
+  "version": "1.0.0",
+  "description": "CC0 audio sourcing CLI - search, download, and compress free audio",
+  "type": "module",
+  "bin": { "cc0-audio": "./src/cli.ts" },
+  "scripts": { "start": "bun run src/cli.ts" },
+  "dependencies": {}
+}

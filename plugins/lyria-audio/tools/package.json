@@ -1,0 +1,9 @@
+{
+  "name": "lyria-music-gen",
+  "version": "1.0.0",
+  "description": "AI music generation CLI powered by Gemini Lyria",
+  "type": "module",
+  "bin": { "lyria": "./src/cli.ts" },
+  "scripts": { "start": "bun run src/cli.ts" },
+  "dependencies": { "@google/genai": "^1.34.0" }
+}

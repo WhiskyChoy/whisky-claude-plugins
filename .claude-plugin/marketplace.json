@@ -25,6 +25,26 @@
       },
       "source": "./plugins/finalize-worktree",
       "category": "productivity"
+    },
+    {
+      "name": "lyria-audio",
+      "description": "AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/lyria-audio",
+      "category": "productivity"
+    },
+    {
+      "name": "cc0-audio",
+      "description": "Search, download, and compress CC0/free-license audio from Freesound. FFmpeg compression presets, URL checking, and batch processing.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/cc0-audio",
+      "category": "productivity"
     }
   ]
 }
