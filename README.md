@@ -34,9 +34,10 @@ Search, download, and compress CC0/free-license audio from Freesound. Handles FF
 
 
 ```bash
-cc0-audio search "dark ambient loop"          # Search for CC0 audio
+cc0-audio search "dark ambient loop"          # Search Freesound (default)
+cc0-audio search "battle theme" --source oga  # Search OpenGameArt
 cc0-audio download 123456                     # Download by Freesound ID
-cc0-audio download "https://..."              # Download by direct URL
+cc0-audio download https://opengameart.org/content/battle-theme-a -o battle  # Download from OGA
 cc0-audio compress input.wav --preset bgm     # Compress with BGM preset
 cc0-audio check-urls "https://example.com/audio"  # Check URL reachability
 cc0-audio batch manifest.json                 # Batch search + download + compress
