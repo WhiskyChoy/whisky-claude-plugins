@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  test-and-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch full history so we can rebase if needed
+          fetch-depth: 0
+
+      # ── Install Bun ──────────────────────────────────────────────
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # ── Install plugin dependencies ──────────────────────────────
+      - name: Install lyria-audio deps
+        working-directory: plugins/lyria-audio/tools
+        run: bun install --frozen-lockfile || bun install
+
+      - name: Install cc0-audio deps
+        working-directory: plugins/cc0-audio/tools
+        run: bun install --frozen-lockfile || bun install
+
+      # ── Run tests ────────────────────────────────────────────────
+      - name: Test lyria-audio
+        working-directory: plugins/lyria-audio/tools
+        run: bun test --timeout 15000
+
+      - name: Test cc0-audio
+        working-directory: plugins/cc0-audio/tools
+        run: bun test --timeout 15000
+
+      # ── Auto-update README ───────────────────────────────────────
+      - name: Generate README
+        run: bash scripts/generate-readme.sh > README.md
+
+      - name: Check for README changes
+        id: diff
+        run: |
+          git diff --quiet README.md && echo "changed=false" >> "$GITHUB_OUTPUT" || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push README
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: auto-update README from plugin metadata"
+          # Pull --rebase to avoid conflicts with concurrent pushes
+          git pull --rebase origin master
+          git push

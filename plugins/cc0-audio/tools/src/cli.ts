@@ -129,7 +129,7 @@ function runCommand(cmd: string, args: string[]): Promise<string> {
 }
 
 function resolveApiKey(flagKey: string | undefined): string | undefined {
-  return flagKey || process.env.FREESOUND_API_KEY;
+  return flagKey || process.env.FREESOUND_API_KEY || undefined;
 }
 
 function requireApiKey(flagKey: string | undefined): string {
