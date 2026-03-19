@@ -107,10 +107,13 @@ function generateHTML(files: AudioFile[]): string {
           <source src="/file/${i}" type="${MIME_TYPES[f.ext] || "audio/mpeg"}">
         </audio>
         <button class="btn play-btn" onclick="togglePlay(${i})">Play</button>
+        <button class="btn speed-btn" onclick="cycleSpeed(${i})">1x</button>
+        <span class="time" id="time-${i}">0:00 / --:--</span>
         <button class="btn pick-btn" onclick="pickTrack(${i})">Pick</button>
       </div>
-      <div class="waveform">
-        <div class="progress" id="progress-${i}"></div>
+      <div class="seekbar" onclick="seek(event, ${i})">
+        <div class="seek-fill" id="progress-${i}"></div>
+        <div class="seek-handle" id="handle-${i}"></div>
       </div>
     </div>
   `).join("\n");
@@ -134,21 +137,29 @@ function generateHTML(files: AudioFile[]): string {
   .track-num { background: #0f3460; color: #7fdbca; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: bold; flex-shrink: 0; }
   .track-name { flex: 1; font-weight: 500; word-break: break-all; }
   .track-size { color: #666; font-size: 0.8em; flex-shrink: 0; }
-  .track-controls { display: flex; gap: 8px; margin-bottom: 6px; }
+  .track-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .btn { padding: 5px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; font-weight: 500; transition: all 0.1s; }
-  .play-btn { background: #0f3460; color: #7fdbca; }
+  .play-btn { background: #0f3460; color: #7fdbca; min-width: 60px; }
   .play-btn:hover { background: #1a4a7a; }
   .play-btn.active { background: #e94560; color: white; }
-  .pick-btn { background: #2a2a1a; color: #ffd700; border: 1px solid #554400; }
+  .speed-btn { background: #1a1a2e; color: #888; border: 1px solid #333; min-width: 36px; padding: 5px 8px; font-size: 0.75em; }
+  .speed-btn:hover { color: #ccc; border-color: #555; }
+  .time { color: #666; font-size: 0.75em; font-variant-numeric: tabular-nums; min-width: 90px; text-align: center; }
+  .pick-btn { background: #2a2a1a; color: #ffd700; border: 1px solid #554400; margin-left: auto; }
   .pick-btn:hover { background: #3a3a2a; }
-  .waveform { height: 4px; background: #0f3460; border-radius: 2px; overflow: hidden; }
-  .progress { height: 100%; width: 0%; background: #e94560; transition: width 0.1s linear; }
+  .seekbar { height: 12px; background: #0f3460; border-radius: 6px; overflow: visible; position: relative; cursor: pointer; }
+  .seekbar:hover { height: 14px; margin-top: -1px; margin-bottom: -1px; }
+  .seek-fill { height: 100%; width: 0%; background: #e94560; border-radius: 6px 0 0 6px; pointer-events: none; }
+  .seek-handle { position: absolute; top: 50%; width: 14px; height: 14px; background: #e94560; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); left: 0%; opacity: 0; transition: opacity 0.1s; pointer-events: none; }
+  .seekbar:hover .seek-handle, .track.playing .seek-handle { opacity: 1; }
   .result { margin-top: 20px; padding: 16px; background: #1a3a1a; border: 1px solid #2a5a2a; border-radius: 8px; display: none; }
   .result.show { display: block; }
   .result h3 { color: #7fdbca; margin-bottom: 8px; }
   .result code { background: #0f3460; padding: 2px 8px; border-radius: 3px; font-size: 0.9em; }
   .stop-all { background: #333; color: #999; margin-top: 16px; width: 100%; padding: 8px; }
   .stop-all:hover { background: #444; color: #ccc; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a5a2a; color: #7fdbca; padding: 10px 24px; border-radius: 8px; font-size: 0.9em; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -163,16 +174,32 @@ ${fileRows}
   <h3>Selected:</h3>
   <p><code id="result-name"></code></p>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
 let currentPlaying = -1;
 const audios = [];
+const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const trackSpeeds = new Array(${files.length}).fill(2); // index into speeds[], default 1x
+
+function fmtTime(s) {
+  if (!s || isNaN(s)) return '--:--';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + sec.toString().padStart(2, '0');
+}
+
 for (let i = 0; i < ${files.length}; i++) {
   const a = document.getElementById('audio-' + i);
   audios.push(a);
   a.addEventListener('timeupdate', () => {
-    const p = document.getElementById('progress-' + i);
-    if (a.duration) p.style.width = (a.currentTime / a.duration * 100) + '%';
+    const pct = a.duration ? (a.currentTime / a.duration * 100) : 0;
+    document.getElementById('progress-' + i).style.width = pct + '%';
+    document.getElementById('handle-' + i).style.left = pct + '%';
+    document.getElementById('time-' + i).textContent = fmtTime(a.currentTime) + ' / ' + fmtTime(a.duration);
+  });
+  a.addEventListener('loadedmetadata', () => {
+    document.getElementById('time-' + i).textContent = '0:00 / ' + fmtTime(a.duration);
   });
   a.addEventListener('ended', () => {
     document.querySelector('[data-idx="' + i + '"]').classList.remove('playing');
@@ -182,6 +209,40 @@ for (let i = 0; i < ${files.length}; i++) {
   });
 }
 
+function seek(e, idx) {
+  const bar = e.currentTarget;
+  const rect = bar.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const a = audios[idx];
+  if (a.duration) a.currentTime = pct * a.duration;
+}
+
+// Drag-to-seek
+document.querySelectorAll('.seekbar').forEach((bar, idx) => {
+  let dragging = false;
+  bar.addEventListener('mousedown', (e) => {
+    dragging = true;
+    seek(e, idx);
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rect = bar.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const a = audios[idx];
+    if (a.duration) a.currentTime = pct * a.duration;
+  });
+  document.addEventListener('mouseup', () => { dragging = false; });
+});
+
+function cycleSpeed(idx) {
+  trackSpeeds[idx] = (trackSpeeds[idx] + 1) % speeds.length;
+  const speed = speeds[trackSpeeds[idx]];
+  audios[idx].playbackRate = speed;
+  const label = speed === 1 ? '1x' : speed < 1 ? speed + 'x' : speed + 'x';
+  document.querySelector('[data-idx="' + idx + '"] .speed-btn').textContent = label;
+}
+
 function stopAll() {
   audios.forEach((a, i) => {
     a.pause(); a.currentTime = 0;
@@ -189,6 +250,7 @@ function stopAll() {
     document.querySelector('[data-idx="' + i + '"] .play-btn').textContent = 'Play';
     document.querySelector('[data-idx="' + i + '"] .play-btn').classList.remove('active');
     document.getElementById('progress-' + i).style.width = '0%';
+    document.getElementById('handle-' + i).style.left = '0%';
   });
   currentPlaying = -1;
 }
@@ -203,6 +265,7 @@ function togglePlay(idx) {
     currentPlaying = -1;
   } else {
     stopAll();
+    a.playbackRate = speeds[trackSpeeds[idx]];
     a.play();
     document.querySelector('[data-idx="' + idx + '"]').classList.add('playing');
     document.querySelector('[data-idx="' + idx + '"] .play-btn').textContent = 'Pause';
@@ -211,14 +274,29 @@ function togglePlay(idx) {
   }
 }
 
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
 function pickTrack(idx) {
   document.querySelectorAll('.track').forEach(t => t.classList.remove('picked'));
   document.querySelector('[data-idx="' + idx + '"]').classList.add('picked');
   const name = document.querySelector('[data-idx="' + idx + '"] .track-name').textContent;
   document.getElementById('result-name').textContent = name;
   document.getElementById('result').classList.add('show');
-  // Notify server
-  fetch('/pick/' + idx, { method: 'POST' });
+  // Notify server and get full path
+  fetch('/pick/' + idx, { method: 'POST' })
+    .then(r => r.text())
+    .then(path => {
+      navigator.clipboard.writeText(path).then(() => {
+        showToast('Copied to clipboard — paste back to terminal');
+      }).catch(() => {
+        showToast('Selected: ' + name);
+      });
+    });
 }
 </script>
 </body>
@@ -323,7 +401,7 @@ const server = Bun.serve({
       }
     }
 
-    // Pick endpoint
+    // Pick endpoint — returns the full file path for clipboard
     const pickMatch = url.pathname.match(/^\/pick\/(\d+)$/);
     if (pickMatch && req.method === "POST") {
       const idx = parseInt(pickMatch[1], 10);
@@ -331,6 +409,7 @@ const server = Bun.serve({
         pickedFile = files[idx].path;
         console.log(`\n\x1b[32m[audio-preview]\x1b[0m Picked: \x1b[33m${files[idx].name}\x1b[0m`);
         console.log(`\x1b[90m  Path: ${pickedFile}\x1b[0m`);
+        return new Response(pickedFile);
       }
       return new Response("ok");
     }
