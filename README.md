@@ -12,6 +12,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
+| **audio-preview** | 1.0.0 | Zero-dependency local web server for comparing and picking audio files in a browser UI. |
 | **cc0-audio** | 1.0.0 | Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing. |
 | **claude-statusline** | 1.0.0 | Custom terminal statusline showing directory, model, and context usage with a color-coded progress bar. |
 | **finalize-worktree** | 1.0.0 | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
@@ -20,6 +21,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 ## Installing Plugins
 
 ```bash
+claude plugin install audio-preview@whisky-claude-plugins
 claude plugin install cc0-audio@whisky-claude-plugins
 claude plugin install claude-statusline@whisky-claude-plugins
 claude plugin install finalize-worktree@whisky-claude-plugins
@@ -27,6 +29,19 @@ claude plugin install lyria-audio@whisky-claude-plugins
 ```
 
 ## Plugin Details
+
+### audio-preview
+
+Zero-dependency local web server for comparing and picking audio files in a browser UI.
+
+
+```bash
+audio-preview ./audio/candidates/           # Preview all audio in directory
+audio-preview track1.mp3 track2.ogg         # Preview specific files
+audio-preview ./dir1/ ./dir2/ --port 9000   # Multiple dirs, custom port
+```
+
+**Bundled CLI tool:** `~/tools/audio-preview/`
 
 ### cc0-audio
 
