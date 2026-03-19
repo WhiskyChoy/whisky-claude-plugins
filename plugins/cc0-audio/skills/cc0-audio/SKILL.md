@@ -47,9 +47,10 @@ where bun  # (cmd) or: ls /c/Users/*/AppData/Local/Microsoft/WinGet/Packages/Ove
 ## Quick Reference
 
 ```bash
-cc0-audio search "dark ambient loop"          # Search for CC0 audio
+cc0-audio search "dark ambient loop"          # Search Freesound (default)
+cc0-audio search "battle theme" --source oga  # Search OpenGameArt
 cc0-audio download 123456                     # Download by Freesound ID
-cc0-audio download "https://..."              # Download by direct URL
+cc0-audio download https://opengameart.org/content/battle-theme-a -o battle  # Download from OGA
 cc0-audio compress input.wav --preset bgm     # Compress with BGM preset
 cc0-audio check-urls "https://example.com/audio"  # Check URL reachability
 cc0-audio batch manifest.json                 # Batch search + download + compress
@@ -63,7 +64,7 @@ Search CC0 audio. Returns ID, title, duration, and preview URL.
 
 | Option | Default | Description |
 |---|---|---|
-| `--source` | `freesound` | Source: `freesound` or `pixabay` |
+| `--source` | `freesound` | Source: `freesound`, `opengameart`/`oga` |
 | `--duration` | - | Max duration in seconds |
 | `--license` | `cc0` | License filter (`cc0`, `by`, `any`) |
 
@@ -73,7 +74,8 @@ cc0-audio search "sword clash" --duration 3
 
 ### `download <id-or-url>`
 
-Download by Freesound ID or direct URL.
+Download by Freesound ID, OpenGameArt content URL, or direct URL.
+OGA downloads auto-print credit info (title, author, license).
 
 | Option | Default | Description |
 |---|---|---|

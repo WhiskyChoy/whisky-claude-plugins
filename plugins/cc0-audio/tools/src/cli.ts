@@ -51,6 +51,7 @@ loadEnvFile(join(homedir(), ".cc0-audio", ".env"));
 // ---------------------------------------------------------------------------
 
 const FREESOUND_API = "https://freesound.org/apiv2";
+const OGA_BASE = "https://opengameart.org";
 
 const COMPRESS_PRESETS: Record<string, string[]> = {
   bgm:   ["-c:a", "libmp3lame", "-ac", "1", "-q:a", "5", "-ar", "44100"],
@@ -81,11 +82,21 @@ interface FreesoundSearchResponse {
   results: FreesoundResult[];
 }
 
+interface OgaResult {
+  title: string;
+  slug: string;
+  url: string;
+  author: string;
+  license: string;
+  files: { name: string; url: string }[];
+}
+
 interface BatchEntry {
   query: string;
   preset?: string;
   output?: string;
   duration?: number;
+  source?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,6 +165,97 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// OpenGameArt scraper
+// ---------------------------------------------------------------------------
+
+/** Search OpenGameArt for music/audio assets. Returns content page slugs. */
+async function ogaSearch(query: string, license: string): Promise<{ title: string; slug: string }[]> {
+  // OGA search: type=Music, sorted by popularity
+  const params = new URLSearchParams({
+    keys: query,
+    type: "Music",
+    sort: "count",
+    order: "desc",
+  });
+  // Add license filter via keys (OGA uses tag-based CC0 filtering)
+  if (license === "cc0") {
+    params.set("field_art_licenses_tid[]", "2"); // 2 = CC0 on OGA
+  } else if (license === "cc-by") {
+    params.set("field_art_licenses_tid[]", "4"); // 4 = CC-BY 3.0
+  }
+
+  const url = `${OGA_BASE}/art-search-advanced?${params}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`OGA search failed: ${res.status}`);
+
+  const html = await res.text();
+
+  // Extract content links: <a href="/content/slug-name">Title</a>
+  const results: { title: string; slug: string }[] = [];
+  const linkPattern = /<a\s+href="\/content\/([^"]+)"[^>]*>([^<]+)<\/a>/gi;
+  let m: RegExpExecArray | null;
+  const seen = new Set<string>();
+
+  while ((m = linkPattern.exec(html)) !== null) {
+    const slug = m[1];
+    const title = m[2].trim();
+    // Skip nav links, pagination, etc.
+    if (seen.has(slug) || !title || title.length < 3) continue;
+    // Skip common non-result links
+    if (slug.includes("?") || slug === "art-search-advanced") continue;
+    seen.add(slug);
+    results.push({ title, slug });
+  }
+
+  return results;
+}
+
+/** Fetch full details from an OGA content page: author, license, download files. */
+async function ogaFetchDetails(slug: string): Promise<OgaResult> {
+  const url = `${OGA_BASE}/content/${slug}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`OGA fetch failed: ${res.status} — ${url}`);
+
+  const html = await res.text();
+
+  // Title: <h1 ...>Title</h1> or <title>Title | OGA</title>
+  const titleMatch = html.match(/<title>([^|<]+)/);
+  const title = titleMatch ? titleMatch[1].trim() : slug;
+
+  // Author: /users/username pattern
+  const authorMatch = html.match(/href="\/users\/([^"]+)"/);
+  const author = authorMatch ? authorMatch[1] : "unknown";
+
+  // License: look for CC0 or CC-BY badge/link
+  let license = "unknown";
+  if (html.includes("creativecommons.org/publicdomain/zero") || html.includes("cc0.png")) {
+    license = "CC0";
+  } else if (html.includes("creativecommons.org/licenses/by/4")) {
+    license = "CC-BY 4.0";
+  } else if (html.includes("creativecommons.org/licenses/by/3")) {
+    license = "CC-BY 3.0";
+  } else if (html.includes("creativecommons.org/licenses/by-sa")) {
+    license = "CC-BY-SA";
+  }
+
+  // Download files: sites/default/files/filename.ext pattern
+  const files: { name: string; url: string }[] = [];
+  const filePattern = /href="((?:https?:\/\/opengameart\.org)?\/sites\/default\/files\/[^"]+\.(mp3|ogg|wav|flac))"/gi;
+  let fm: RegExpExecArray | null;
+  const seenFiles = new Set<string>();
+
+  while ((fm = filePattern.exec(html)) !== null) {
+    const fileUrl = fm[1].startsWith("http") ? fm[1] : `${OGA_BASE}${fm[1]}`;
+    const fileName = fileUrl.split("/").pop() || "";
+    if (seenFiles.has(fileName)) continue;
+    seenFiles.add(fileName);
+    files.push({ name: fileName, url: fileUrl });
+  }
+
+  return { title, slug, url, author, license, files };
+}
+
+// ---------------------------------------------------------------------------
 // Subcommands
 // ---------------------------------------------------------------------------
 
@@ -185,6 +287,11 @@ async function cmdSearch(args: string[]): Promise<void> {
     console.error("\x1b[31mError:\x1b[0m No search query provided.");
     console.error("Usage: cc0-audio search \"dark fantasy ambient loop\"");
     process.exit(1);
+  }
+
+  if (source === "opengameart" || source === "oga") {
+    await searchOga(query, license);
+    return;
   }
 
   const apiKey = requireApiKey(apiKeyFlag);
@@ -232,6 +339,53 @@ async function cmdSearch(args: string[]): Promise<void> {
     if (tags) console.log(`  \x1b[90m  Tags: ${tags}\x1b[0m`);
     console.log(`  \x1b[90m  Preview: ${previewUrl}\x1b[0m`);
     console.log("");
+  }
+}
+
+/** Search OpenGameArt and display results with download details. */
+async function searchOga(query: string, license: string): Promise<void> {
+  console.log(`\x1b[36m[cc0-audio]\x1b[0m Searching OpenGameArt...`);
+  console.log(`\x1b[90mQuery: ${query}\x1b[0m`);
+  console.log("");
+
+  const results = await ogaSearch(query, license);
+
+  if (results.length === 0) {
+    console.log("\x1b[33mNo results found.\x1b[0m Try a different query.");
+    return;
+  }
+
+  console.log(`\x1b[32mFound ${results.length} results.\x1b[0m Fetching details...\n`);
+
+  // Fetch details for top 10 results
+  const limit = Math.min(results.length, 10);
+  for (let i = 0; i < limit; i++) {
+    const { slug } = results[i];
+    try {
+      const details = await ogaFetchDetails(slug);
+      const audioFiles = details.files.filter(f =>
+        f.name.match(/\.(mp3|ogg|wav|flac)$/i)
+      );
+
+      console.log(`  \x1b[33m${details.slug}\x1b[0m  ${details.title}`);
+      console.log(`  \x1b[90m  Author: ${details.author}  |  License: ${details.license}\x1b[0m`);
+      if (audioFiles.length > 0) {
+        console.log(`  \x1b[90m  Files (${audioFiles.length}):\x1b[0m`);
+        for (const f of audioFiles.slice(0, 3)) {
+          console.log(`  \x1b[90m    ${f.url}\x1b[0m`);
+        }
+        if (audioFiles.length > 3) {
+          console.log(`  \x1b[90m    ... and ${audioFiles.length - 3} more\x1b[0m`);
+        }
+      } else {
+        console.log(`  \x1b[90m  (no direct audio file links found)\x1b[0m`);
+      }
+      console.log(`  \x1b[90m  Page: ${OGA_BASE}/content/${slug}\x1b[0m`);
+      console.log("");
+    } catch {
+      console.log(`  \x1b[33m${slug}\x1b[0m  ${results[i].title}`);
+      console.log(`  \x1b[90m  (could not fetch details)\x1b[0m\n`);
+    }
   }
 }
 
@@ -311,6 +465,37 @@ async function cmdDownload(args: string[]): Promise<string> {
     }
 
     console.log(`\x1b[32m[cc0-audio]\x1b[0m Saved: ${outputPath}`);
+    return outputPath;
+  } else if (target.includes("opengameart.org/content/")) {
+    // OpenGameArt content page — fetch details and download first audio file
+    const slug = target.replace(/.*\/content\//, "").replace(/\/$/, "");
+    console.log(`\x1b[36m[cc0-audio]\x1b[0m Fetching OpenGameArt: ${slug}...`);
+
+    const details = await ogaFetchDetails(slug);
+    console.log(`\x1b[90mTitle: ${details.title}\x1b[0m`);
+    console.log(`\x1b[90mAuthor: ${details.author}  |  License: ${details.license}\x1b[0m`);
+
+    const audioFiles = details.files.filter(f =>
+      f.name.match(/\.(mp3|ogg|wav|flac)$/i)
+    );
+    if (audioFiles.length === 0) {
+      console.error("\x1b[31mError:\x1b[0m No downloadable audio files found on this page.");
+      process.exit(1);
+    }
+
+    // Prefer mp3, then ogg, then wav
+    const preferred = audioFiles.find(f => f.name.endsWith(".mp3"))
+      || audioFiles.find(f => f.name.endsWith(".ogg"))
+      || audioFiles[0];
+    const ext = format || extname(preferred.name).replace(".", "") || "mp3";
+    const fileName = output ? `${output}.${ext}` : preferred.name;
+    const outputPath = join(outputDir, fileName);
+
+    console.log(`\x1b[36m[cc0-audio]\x1b[0m Downloading: ${preferred.name}`);
+    await downloadFile(preferred.url, outputPath);
+
+    console.log(`\x1b[32m[cc0-audio]\x1b[0m Saved: ${outputPath}`);
+    console.log(`\x1b[90mCredit: "${details.title}" by ${details.author} (${details.license}) — ${OGA_BASE}/content/${slug}\x1b[0m`);
     return outputPath;
   } else {
     // Direct URL download
@@ -646,14 +831,14 @@ function printHelp(): void {
   cc0-audio batch <manifest.json> [options]
 
 \x1b[33mSubcommands:\x1b[0m
-  search       Search Freesound.org for CC0 audio
-  download     Download a sound by Freesound ID or direct URL
+  search       Search Freesound.org or OpenGameArt for CC0 audio
+  download     Download by Freesound ID, OpenGameArt URL, or direct URL
   compress     Compress audio with FFmpeg presets
   check-urls   Batch HEAD-check all .mp3 files under a URL
   batch        Search + download + compress from a JSON manifest
 
 \x1b[33mSearch options:\x1b[0m
-  --source     Source: freesound (default)
+  --source     Source: freesound (default), opengameart/oga
   --license    License filter: cc0 (default), cc-by, any
   --duration   Max duration in seconds
   --api-key    Freesound API key
@@ -694,8 +879,10 @@ function printHelp(): void {
 
 \x1b[33mExamples:\x1b[0m
   cc0-audio search "epic orchestral battle"
+  cc0-audio search "battle theme" --source opengameart --license cc0
   cc0-audio search "rain ambience" --duration 60 --license cc0
   cc0-audio download 456789 -o rain-loop -d audio/
+  cc0-audio download https://opengameart.org/content/battle-theme-a -o battle
   cc0-audio download https://example.com/sound.mp3 -o mysound
   cc0-audio compress raw.wav --preset bgm --duration 30 -o bgm-loop
   cc0-audio check-urls https://cdn.example.com/audio/
