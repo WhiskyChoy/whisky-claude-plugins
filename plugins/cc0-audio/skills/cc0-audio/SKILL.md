@@ -136,6 +136,33 @@ A JSON array where each entry defines a search-download-compress pipeline:
 ]
 ```
 
+## Credit & Attribution Tracking
+
+**IMPORTANT:** After downloading audio, always record credits in the project's documentation.
+
+### CC0 (Public Domain)
+No attribution legally required, but good practice to record the source for auditability:
+```markdown
+| `output.mp3` | Track Title | Author | [Freesound #ID](https://freesound.org/people/author/sounds/ID/) (CC0) |
+```
+
+### CC-BY (Attribution Required)
+**Must** credit the author visibly in the project. Include:
+- Author name
+- Original title
+- Source URL
+- License: "Licensed under CC-BY 4.0"
+
+```markdown
+| `output.mp3` | Track Title | AuthorName | [Freesound #ID](url) — [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+```
+
+### Best practice
+- Always prefer CC0 (`--license cc0`) to avoid attribution obligations
+- If using CC-BY, verify the specific version (3.0 vs 4.0) from the Freesound page
+- Keep a credits table in the project README or a dedicated `CREDITS.md`
+- Record Freesound IDs so sources are traceable even if URLs change
+
 ## API Key Setup
 
 **Freesound**: Create `~/.cc0-audio/.env` with your API key:
