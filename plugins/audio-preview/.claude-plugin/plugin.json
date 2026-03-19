@@ -1,0 +1,7 @@
+{
+  "name": "audio-preview",
+  "description": "Zero-dependency local web server for comparing and picking audio files in a browser UI.",
+  "author": {
+    "name": "whisky"
+  }
+}

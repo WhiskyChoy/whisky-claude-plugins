@@ -45,6 +45,16 @@
       },
       "source": "./plugins/cc0-audio",
       "category": "productivity"
+    },
+    {
+      "name": "audio-preview",
+      "description": "Zero-dependency local web server for comparing and picking audio files in a browser UI.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/audio-preview",
+      "category": "productivity"
     }
   ]
 }
