@@ -294,7 +294,14 @@ async function cmdSearch(args: string[]): Promise<void> {
     return;
   }
 
-  const apiKey = requireApiKey(apiKeyFlag);
+  const apiKey = resolveApiKey(apiKeyFlag);
+  if (!apiKey) {
+    console.log("\x1b[33m[cc0-audio]\x1b[0m No Freesound API key found — falling back to OpenGameArt.");
+    console.log(`\x1b[90mTo use Freesound, set up: mkdir -p ~/.cc0-audio && echo 'FREESOUND_API_KEY=your_key' > ~/.cc0-audio/.env\x1b[0m`);
+    console.log(`\x1b[90mGet a key at: https://freesound.org/apiv2/apply/\x1b[0m\n`);
+    await searchOga(query, license);
+    return;
+  }
 
   console.log(`\x1b[36m[cc0-audio]\x1b[0m Searching Freesound...`);
   console.log(`\x1b[90mQuery: ${query}\x1b[0m`);
@@ -427,7 +434,13 @@ async function cmdDownload(args: string[]): Promise<string> {
 
   if (isNumeric) {
     // Freesound download by ID
-    const apiKey = requireApiKey(apiKeyFlag);
+    const apiKey = resolveApiKey(apiKeyFlag);
+    if (!apiKey) {
+      console.error("\x1b[31mError:\x1b[0m Freesound API key required to download by numeric ID.");
+      console.error("\x1b[90mAlternatively, use an OpenGameArt URL: cc0-audio download https://opengameart.org/content/...\x1b[0m");
+      console.error("\x1b[90mOr set up: mkdir -p ~/.cc0-audio && echo 'FREESOUND_API_KEY=your_key' > ~/.cc0-audio/.env\x1b[0m");
+      process.exit(1);
+    }
     const soundId = target;
 
     // First get sound info for the name
@@ -718,7 +731,14 @@ async function cmdBatch(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const apiKey = requireApiKey(apiKeyFlag);
+  const apiKey = resolveApiKey(apiKeyFlag);
+  // Determine effective source: explicit flag, or fall back to OGA if no Freesound key
+  let effectiveSource = source;
+  if (effectiveSource === "freesound" && !apiKey) {
+    console.log("\x1b[33m[cc0-audio]\x1b[0m No Freesound API key — batch will use OpenGameArt.");
+    console.log(`\x1b[90mTo use Freesound, set up: mkdir -p ~/.cc0-audio && echo 'FREESOUND_API_KEY=your_key' > ~/.cc0-audio/.env\x1b[0m\n`);
+    effectiveSource = "opengameart";
+  }
 
   const manifest: BatchEntry[] = JSON.parse(await readFile(absPath, "utf-8"));
   console.log(`\x1b[36m[cc0-audio]\x1b[0m Batch processing ${manifest.length} entries...\n`);
@@ -735,47 +755,73 @@ async function cmdBatch(args: string[]): Promise<void> {
     const label = entry.output || `batch-${idx}`;
     console.log(`\x1b[36m[${idx + 1}/${manifest.length}]\x1b[0m ${entry.query}`);
 
+    // Per-entry source override, then batch-level effectiveSource
+    const entrySource = entry.source || effectiveSource;
+
     try {
-      // Step 1: Search
-      const licenseFilter = LICENSE_FILTERS[license] || "";
-      const durationFilter = entry.duration ? ` duration:[0 TO ${entry.duration}]` : "";
-      const filter = (licenseFilter + durationFilter).trim();
+      let rawPath: string;
 
-      const params = new URLSearchParams({
-        query: entry.query,
-        token: apiKey,
-        fields: "id,name,duration,previews,license",
-        page_size: "1",
-      });
-      if (filter) params.set("filter", filter);
+      if (entrySource === "opengameart" || entrySource === "oga") {
+        // ── OpenGameArt pipeline ──
+        const ogaResults = await ogaSearch(entry.query, license);
+        if (ogaResults.length === 0) {
+          console.log(`  \x1b[33mNo OGA results, skipping.\x1b[0m\n`);
+          errors++;
+          continue;
+        }
+        const details = await ogaFetchDetails(ogaResults[0].slug);
+        const audioFiles = details.files.filter(f => f.name.match(/\.(mp3|ogg|wav|flac)$/i));
+        if (audioFiles.length === 0) {
+          console.log(`  \x1b[33mNo audio files on OGA page, skipping.\x1b[0m\n`);
+          errors++;
+          continue;
+        }
+        const preferred = audioFiles.find(f => f.name.endsWith(".mp3")) || audioFiles[0];
+        console.log(`  \x1b[90mPicked: ${details.title} by ${details.author} (${details.license})\x1b[0m`);
 
-      const searchUrl = `${FREESOUND_API}/search/text/?${params}`;
-      const searchRes = await fetch(searchUrl);
+        rawPath = join(outputDir, `${label}-raw${extname(preferred.name) || ".mp3"}`);
+        await downloadFile(preferred.url, rawPath);
+      } else {
+        // ── Freesound pipeline ──
+        const licenseFilter = LICENSE_FILTERS[license] || "";
+        const durationFilter = entry.duration ? ` duration:[0 TO ${entry.duration}]` : "";
+        const filter = (licenseFilter + durationFilter).trim();
 
-      if (!searchRes.ok) {
-        throw new Error(`Search failed: ${searchRes.status}`);
+        const params = new URLSearchParams({
+          query: entry.query,
+          token: apiKey!,
+          fields: "id,name,duration,previews,license",
+          page_size: "1",
+        });
+        if (filter) params.set("filter", filter);
+
+        const searchUrl = `${FREESOUND_API}/search/text/?${params}`;
+        const searchRes = await fetch(searchUrl);
+
+        if (!searchRes.ok) {
+          throw new Error(`Search failed: ${searchRes.status}`);
+        }
+
+        const data: FreesoundSearchResponse = await searchRes.json();
+        if (data.results.length === 0) {
+          console.log(`  \x1b[33mNo results, skipping.\x1b[0m\n`);
+          errors++;
+          continue;
+        }
+
+        const sound = data.results[0];
+        console.log(`  \x1b[90mPicked: #${sound.id} — ${sound.name} (${formatDuration(sound.duration)})\x1b[0m`);
+
+        const previewUrl = sound.previews?.["preview-hq-mp3"] || sound.previews?.["preview-lq-mp3"];
+        if (!previewUrl) {
+          console.log(`  \x1b[33mNo preview URL, skipping.\x1b[0m\n`);
+          errors++;
+          continue;
+        }
+
+        rawPath = join(outputDir, `${label}-raw.mp3`);
+        await downloadFile(previewUrl, rawPath);
       }
-
-      const data: FreesoundSearchResponse = await searchRes.json();
-      if (data.results.length === 0) {
-        console.log(`  \x1b[33mNo results, skipping.\x1b[0m\n`);
-        errors++;
-        continue;
-      }
-
-      const sound = data.results[0];
-      console.log(`  \x1b[90mPicked: #${sound.id} — ${sound.name} (${formatDuration(sound.duration)})\x1b[0m`);
-
-      // Step 2: Download preview
-      const previewUrl = sound.previews?.["preview-hq-mp3"] || sound.previews?.["preview-lq-mp3"];
-      if (!previewUrl) {
-        console.log(`  \x1b[33mNo preview URL, skipping.\x1b[0m\n`);
-        errors++;
-        continue;
-      }
-
-      const rawPath = join(outputDir, `${label}-raw.mp3`);
-      await downloadFile(previewUrl, rawPath);
 
       // Step 3: Compress
       const preset = entry.preset || "bgm";
@@ -874,8 +920,9 @@ function printHelp(): void {
   ]
 
 \x1b[33mAPI Key:\x1b[0m
-  Set FREESOUND_API_KEY via environment, .env file, or --api-key flag.
+  Freesound requires FREESOUND_API_KEY (env, .env, or --api-key flag).
   Get a key at: https://freesound.org/apiv2/apply/
+  If no key is set, search/batch automatically fall back to OpenGameArt.
 
 \x1b[33mExamples:\x1b[0m
   cc0-audio search "epic orchestral battle"
