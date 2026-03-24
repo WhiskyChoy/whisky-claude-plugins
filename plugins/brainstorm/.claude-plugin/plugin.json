@@ -1,0 +1,7 @@
+{
+  "name": "brainstorm",
+  "description": "Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code.",
+  "author": {
+    "name": "whisky"
+  }
+}

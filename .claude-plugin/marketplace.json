@@ -75,6 +75,26 @@
       },
       "source": "./plugins/overleaf-cleanup",
       "category": "productivity"
+    },
+    {
+      "name": "brainstorm",
+      "description": "Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/brainstorm",
+      "category": "productivity"
+    },
+    {
+      "name": "drawio",
+      "description": "Generate draw.io diagrams as .drawio files, optionally export to PNG/SVG/PDF with embedded XML. Based on jgraph/drawio-mcp (Apache 2.0).",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/drawio",
+      "category": "productivity"
     }
   ]
 }

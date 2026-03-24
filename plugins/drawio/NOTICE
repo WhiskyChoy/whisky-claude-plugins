@@ -1,0 +1,10 @@
+This plugin is derived from the draw.io CLI skill in:
+
+  jgraph/drawio-mcp — https://github.com/jgraph/drawio-mcp
+  Copyright (c) JGraph Ltd
+  Licensed under the Apache License, Version 2.0
+
+Local modifications by WhiskyChoy:
+- Added container/group patterns and edge routing guidance
+- Added style reference table and XML well-formedness rules
+- Reformatted as a Claude Code plugin
