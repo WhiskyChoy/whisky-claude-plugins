@@ -1,6 +1,6 @@
 ---
 name: paper-to-slides
-description: Convert one or more academic papers (PDF, LaTeX, Overleaf project) into polished HTML presentations. Supports multiple papers in one deck, explicit language selection, screen-aware sizing for 4K displays, and style extraction from reference PPT/HTML templates. Outputs to a dedicated slides directory at the project root (never into the paper source directory). Delegates to frontend-slides for rendering and automatically runs overleaf-cleanup for LaTeX/zip/directory inputs.
+description: Convert one or more academic papers (PDF, LaTeX, Overleaf project) into polished HTML presentations. Supports multiple papers in one deck, explicit language selection, screen-aware sizing for 4K displays, and style extraction from reference PPT/HTML templates. Outputs to a dedicated slides directory at the project root (never into the paper source directory). Delegates to a slide generation skill (frontend-slides or frontend-design) for rendering and automatically runs overleaf-cleanup for LaTeX/zip/directory inputs.
 allowed_tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestion", "Agent", "Skill", "WebFetch"]
 arguments:
   - name: paper_path
@@ -19,7 +19,7 @@ arguments:
 
 # Paper to Slides
 
-Convert one or more academic papers into a compelling HTML presentation. Reads each paper, extracts the narrative structure, adapts to the target audience, and produces a polished slide deck via the `frontend-slides` skill.
+Convert one or more academic papers into a compelling HTML presentation. Reads each paper, extracts the narrative structure, adapts to the target audience, and produces a polished slide deck via the `frontend-slides` or `frontend-design` skill (see Prerequisites for resolution).
 
 **Detailed reference material** (outline templates, CSS rules, OOXML transforms, fidelity checklists, etc.) is in [`REFERENCE.md`](./REFERENCE.md). Read it on-demand when a specific step requires it.
 
@@ -71,8 +71,17 @@ Verify at the start of every invocation. **Stop with actionable guidance** if an
 
 | Skill | Purpose | Check | Invoke |
 |-------|---------|-------|--------|
-| `frontend-slides` | HTML slide generation | Verify skill file exists | Claude: `Skill("frontend-slides")` / Codex: `$frontend-slides` |
+| `frontend-slides` or `frontend-design` | HTML slide generation | See resolution below | See resolution below |
 | `overleaf-cleanup` | LaTeX project cleanup | Only for `.zip`/`.tex`/directory inputs | Claude: `Skill("overleaf-cleanup")` / Codex: `$overleaf-cleanup` |
+
+#### Slide Provider Resolution
+
+At the start of every invocation, determine which slide generation skill is available. Check in order:
+
+1. **`frontend-slides`** — Check if `Skill("frontend-slides")` is available. This is the preferred provider (ships with recent Claude Code versions).
+2. **`frontend-design`** — Fallback. Check if `Skill("frontend-design")` is available. Can produce slide-like output but is not specialized for presentations.
+
+Use whichever is found first. If neither is available, stop and tell the user to update Claude Code.
 
 ### Required Python Packages
 
@@ -351,9 +360,9 @@ python "$SCREEN_SCRIPT"
 
 If `css_recommendation` is `"boost"` (HiDPI/4K): increase CSS `clamp()` upper bounds ~50%, add `@media (min-width: 2500px)` breakpoint. If `"default"`: use standard values.
 
-#### Step 12: Generate Slides via frontend-slides
+#### Step 12: Generate Slides via Slide Provider
 
-Invoke the `frontend-slides` skill *(Claude Code: `Skill("frontend-slides", ...)`; Codex: `$frontend-slides ...`)* with: structured slide content (type, heading, body, figure, notes per slide), style direction, language, screen resolution, `_style_template.html`, and logo info from Step 7b.
+Invoke the resolved slide provider from the Prerequisites step *(Claude Code: `Skill("frontend-slides", ...)` or `Skill("frontend-design", ...)`; Codex: `$frontend-slides ...` or `$frontend-design ...`)* with: structured slide content (type, heading, body, figure, notes per slide), style direction, language, screen resolution, `_style_template.html`, and logo info from Step 7b.
 
 #### Step 12b: Generate Dual Aspect Ratio Version
 
@@ -545,7 +554,7 @@ All scripts live in the same directory as this SKILL.md (on Claude Code: `~/.cla
 10. **Generate outline** — for multi-paper, choose organization strategy (Step 9)
 11. **Handle figures** — copy to `assets/`, flag figure pages (Step 10)
 12. **Detect screen** resolution (Step 11)
-13. **Generate slides** via `frontend-slides` — include logo if confirmed (Step 12)
+13. **Generate slides** via resolved slide provider — include logo if confirmed (Step 12)
 14. **Dual version** — generate secondary ratio if requested (Step 12b)
 14b. **Logo fallback** — if not embedded during generation, run `inject_logo.py` (Step 7b Approach B)
 15. **Preview and iterate** (Step 13)

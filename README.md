@@ -18,8 +18,6 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **claude-statusline** | 1.0.0 | claude-code | Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this. |
 | **drawio** | 1.0.0 | claude-code, codex | Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution. |
 | **finalize-worktree** | 1.0.0 | claude-code, codex | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
-| **frontend-slides** | 1.0.0 | claude-code, codex (partial) | [Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself. |
-| **image-generation** | 1.0.0 | claude-code, codex | [Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials. |
 | **lyria-audio** | 1.0.0 | claude-code, codex | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | claude-code, codex (partial) | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
 | **paper-to-slides** | 1.0.0 | claude-code, codex (partial) | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
@@ -43,8 +41,6 @@ claude plugin install cc0-audio@whisky-claude-plugins
 claude plugin install claude-statusline@whisky-claude-plugins
 claude plugin install drawio@whisky-claude-plugins
 claude plugin install finalize-worktree@whisky-claude-plugins
-claude plugin install frontend-slides@whisky-claude-plugins
-claude plugin install image-generation@whisky-claude-plugins
 claude plugin install lyria-audio@whisky-claude-plugins
 claude plugin install overleaf-cleanup@whisky-claude-plugins
 claude plugin install paper-to-slides@whisky-claude-plugins
@@ -130,16 +126,6 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 </details>
 <details>
 <summary><strong>finalize-worktree</strong> — Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.</summary>
-
-*No additional details.*
-</details>
-<details>
-<summary><strong>frontend-slides</strong> — [Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself.</summary>
-
-*No additional details.*
-</details>
-<details>
-<summary><strong>image-generation</strong> — [Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials.</summary>
 
 *No additional details.*
 </details>

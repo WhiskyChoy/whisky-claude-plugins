@@ -97,26 +97,6 @@
       "category": "productivity"
     },
     {
-      "name": "frontend-slides",
-      "description": "[Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin).",
-      "version": "1.0.0",
-      "author": {
-        "name": "whisky"
-      },
-      "source": "./plugins/frontend-slides",
-      "category": "virtual"
-    },
-    {
-      "name": "image-generation",
-      "description": "[Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials.",
-      "version": "1.0.0",
-      "author": {
-        "name": "whisky"
-      },
-      "source": "./plugins/image-generation",
-      "category": "virtual"
-    },
-    {
       "name": "switch-workspace",
       "description": "Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume there.",
       "version": "1.0.0",
