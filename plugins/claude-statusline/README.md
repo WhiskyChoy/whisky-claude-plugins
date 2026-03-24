@@ -1,6 +1,8 @@
 # claude-statusline
 
-A custom terminal statusline for Claude Code that displays:
+> **Want more?** [claude-hud](https://github.com/jarrodwatts/claude-hud) offers a richer statusline with active tools, running agents, and todo progress. Running `/setup` will offer to install it for you.
+
+A minimal terminal statusline for Claude Code that displays:
 
 - **Directory** — current working directory basename
 - **Model** — active model name

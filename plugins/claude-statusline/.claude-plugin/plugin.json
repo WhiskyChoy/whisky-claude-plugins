@@ -1,6 +1,6 @@
 {
   "name": "claude-statusline",
-  "description": "Custom terminal statusline showing directory, model, and context usage with a color-coded progress bar.",
+  "description": "Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this.",
   "author": {
     "name": "whisky"
   }

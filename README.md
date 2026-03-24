@@ -14,7 +14,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 |--------|---------|-------------|
 | **audio-preview** | 1.0.0 | Zero-dependency local web server for comparing and picking audio files in a browser UI. |
 | **cc0-audio** | 1.0.0 | Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing. |
-| **claude-statusline** | 1.0.0 | Custom terminal statusline showing directory, model, and context usage with a color-coded progress bar. |
+| **claude-statusline** | 1.0.0 | Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this. |
 | **finalize-worktree** | 1.0.0 | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
 | **lyria-audio** | 1.0.0 | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
@@ -66,7 +66,7 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 
 ### claude-statusline
 
-Custom terminal statusline showing directory, model, and context usage with a color-coded progress bar.
+Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this.
 
 **Scripts:** statusline.py,statusline.sh
 
