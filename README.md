@@ -20,6 +20,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **finalize-worktree** | 1.0.0 | claude-code, codex | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
 | **lyria-audio** | 1.0.0 | claude-code, codex | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | claude-code, codex (partial) | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
+| **overleaf-local** | 1.0.0 | claude-code (partial), codex (partial) | Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users. |
 | **paper-to-slides** | 1.0.0 | claude-code, codex (partial) | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
 | **switch-workspace** | 1.0.0 | claude-code | Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume in the target workspace. |
 
@@ -43,6 +44,7 @@ claude plugin install drawio@whisky-claude-plugins
 claude plugin install finalize-worktree@whisky-claude-plugins
 claude plugin install lyria-audio@whisky-claude-plugins
 claude plugin install overleaf-cleanup@whisky-claude-plugins
+claude plugin install overleaf-local@whisky-claude-plugins
 claude plugin install paper-to-slides@whisky-claude-plugins
 claude plugin install switch-workspace@whisky-claude-plugins
 ```
@@ -80,14 +82,13 @@ Copy-Item -Recurse plugins\<name>\skills\<name> .agents\skills\<name>
 
 Some plugins bundle runnable code alongside the skill (in `tools/`, `scripts/`, `src/`, etc.). The SKILL.md for each plugin documents how to locate and run its bundled code — check the skill's setup instructions for specifics.
 
-**Plugins with sub-commands** (e.g., `brainstorm` has `brainstorm-end` and `brainstorm-save`) store each sub-command as a separate SKILL.md under the plugin's `skills/` directory. Since Codex scans `skills/**/SKILL.md` recursively, you can copy the entire skills tree:
+**Plugins with sub-commands** (e.g., `brainstorm` has `brainstorm-end` and `brainstorm-save`) store each sub-command as a separate SKILL.md under the plugin's `skills/` directory. Sub-command directories use **self-namespaced names** that match the SKILL.md `name` field (e.g., `brainstorm-end/` not `end/`), following the [Codex skill-creator convention](https://github.com/openai/skills/blob/main/skills/.system/skill-creator/SKILL.md). This prevents filesystem collisions when copying skills from multiple plugins into the same directory:
 
 ```bash
 # Copy all skills from a plugin at once (includes sub-commands)
+# Safe because each directory name is globally unique (e.g., brainstorm-end/, not end/)
 cp -r plugins/<name>/skills/* ~/.codex/skills/
 ```
-
-Sub-command skills use self-namespaced `name` fields (e.g., `brainstorm-end` instead of `end`) so they remain unambiguous in Codex's flat skill namespace.
 
 Skills marked **Partial** in the Compatibility column use Claude Code-specific tools. See [`PLATFORM_COMPAT.md`](PLATFORM_COMPAT.md) for the full tool mapping table (Claude Code → Codex → generic).
 
@@ -114,7 +115,17 @@ audio-preview ./dir1/ ./dir2/ --port 9000   # Multiple dirs, custom port
 <details>
 <summary><strong>brainstorm</strong> — Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code.</summary>
 
-*No additional details.*
+
+**Sub-Commands:**
+
+| Command | Purpose |
+|---------|---------|
+| `/brainstorm` | Enter brainstorm mode (this skill) |
+| `/brainstorm:brainstorm-save` | Save the current discussion as a spec (final or partial checkpoint) |
+| `/brainstorm:brainstorm-end` | Exit brainstorm mode and resume normal agent behavior |
+
+Saving does NOT auto-exit. The user may want to refine the spec further after saving.
+
 </details>
 <details>
 <summary><strong>cc0-audio</strong> — Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing.</summary>
@@ -188,6 +199,24 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 <summary><strong>overleaf-cleanup</strong> — Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory.</summary>
 
 *No additional details.*
+</details>
+<details>
+<summary><strong>overleaf-local</strong> — Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users.</summary>
+
+
+**Sub-Commands:**
+
+| Command | Purpose |
+|---------|---------|
+| `/overleaf-local` | Main entry — context-aware routing (this skill) |
+| `/overleaf-local:overleaf-local-setup` | Prerequisites, clone, engine detection, preferences |
+| `/overleaf-local:overleaf-local-compile` | Run the compile-fix loop |
+| `/overleaf-local:overleaf-local-sync` | Commit + pull --rebase + push to Overleaf |
+| `/overleaf-local:overleaf-local-pull` | Pull from Overleaf only |
+| `/overleaf-local:overleaf-local-push` | Push to Overleaf only |
+| `/overleaf-local:overleaf-local-status` | Show workspace state |
+| `/overleaf-local:overleaf-local-lesson` | Manage lessons (save/list/search) |
+
 </details>
 <details>
 <summary><strong>paper-to-slides</strong> — Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.</summary>

@@ -92,9 +92,11 @@ Use Claude Code tool names as the primary notation, reference `PLATFORM_COMPAT.m
 
 ### Sub-command naming convention
 
-Plugins with multiple skills use short directory names and self-namespaced `name` fields:
+Plugins with multiple skills use **self-namespaced directory names** that match the SKILL.md `name` field. This follows the [Codex skill-creator convention](https://github.com/openai/skills/blob/main/skills/.system/skill-creator/SKILL.md) where the folder name equals the skill name, preventing filesystem collisions when skills are copied into Codex's flat `~/.codex/skills/` directory.
 
-- **Directory:** `skills/<short>/` → Claude Code resolves as `<plugin>:<short>`
-- **`name` field:** `<plugin>-<short>` → Codex uses this in its flat namespace
+- **Directory:** `skills/<plugin>-<sub>/` — folder name = skill name
+- **`name` field:** `<plugin>-<sub>` — same as directory, used by both platforms
+- **Claude Code:** resolves as `/<plugin>:<plugin>-<sub>`
+- **Codex:** `$<plugin>-<sub>`
 
-Example: `plugins/brainstorm/skills/end/SKILL.md` with `name: brainstorm-end` → `/brainstorm:end` (Claude Code), `$brainstorm-end` (Codex).
+Example: `plugins/brainstorm/skills/brainstorm-end/SKILL.md` with `name: brainstorm-end` → `/brainstorm:brainstorm-end` (Claude Code), `$brainstorm-end` (Codex).

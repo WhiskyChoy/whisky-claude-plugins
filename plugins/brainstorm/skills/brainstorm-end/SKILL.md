@@ -1,6 +1,6 @@
 ---
 name: brainstorm-end
-description: Exit brainstorm mode. Use when the user says "exit brainstorm", "退出头脑风暴", "结束讨论", "done brainstorming", or any clear intent to leave brainstorm mode. Invocable as /brainstorm:end (Claude Code) or $brainstorm-end (Codex).
+description: Exit brainstorm mode. Use when the user says "exit brainstorm", "退出头脑风暴", "结束讨论", "done brainstorming", or any clear intent to leave brainstorm mode. Invocable as /brainstorm:brainstorm-end (Claude Code) or $brainstorm-end (Codex).
 user-invocable: true
 ---
 
@@ -8,7 +8,7 @@ user-invocable: true
 
 1. Summarize what was decided (one paragraph).
 2. State whether a spec was written (and its path under `brainstorming/`), or if the discussion is incomplete.
-   - If incomplete and substantial discussion occurred, suggest running `/brainstorm:save` first to capture progress.
+   - If incomplete and substantial discussion occurred, suggest running `/brainstorm:brainstorm-save` first to capture progress.
 3. Resume normal coding agent behavior — all brainstorm-specific constraints no longer apply.
 
 **Clean unload (context recovery):**

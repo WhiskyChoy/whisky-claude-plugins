@@ -1,6 +1,6 @@
 ---
 name: brainstorm-save
-description: Save the current brainstorm discussion as a specification document. Use when the user wants to persist brainstorm progress — either a final spec or a partial checkpoint. Invocable as /brainstorm:save (Claude Code) or $brainstorm-save (Codex).
+description: Save the current brainstorm discussion as a specification document. Use when the user wants to persist brainstorm progress — either a final spec or a partial checkpoint. Invocable as /brainstorm:brainstorm-save (Claude Code) or $brainstorm-save (Codex).
 user-invocable: true
 ---
 

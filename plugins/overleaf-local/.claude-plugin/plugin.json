@@ -1,0 +1,11 @@
+{
+  "name": "overleaf-local",
+  "description": "Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users.",
+  "author": {
+    "name": "whisky"
+  },
+  "platforms": {
+    "claude-code": "partial",
+    "codex": "partial"
+  }
+}

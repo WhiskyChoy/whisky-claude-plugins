@@ -18,7 +18,7 @@ Coding agents produce code faster than humans can comprehend it. This skill inve
 - Read files freely to inform discussion. Don't write production source code — but pseudocode, math notation, and small verification scripts are fine.
 - The scope is broad: algorithm design, data structure choices, system architecture, engineering tradeoffs, performance optimization, API design — anything that benefits from thinking before coding.
 - Use WebSearch to research prior art, existing solutions, and relevant literature — don't rely solely on training data.
-- The only persistent file you write is the final spec, saved to `brainstorming/` under the project root (via `/brainstorm:save`).
+- The only persistent file you write is the final spec, saved to `brainstorming/` under the project root (via `/brainstorm:brainstorm-save`).
 
 ## Comprehension Levels
 
@@ -71,7 +71,7 @@ At structured decision points (choosing between approaches, confirming convergen
 
 ### Phase 4: Specification Output
 
-Use `/brainstorm:save` to write the spec. The save sub-command handles file naming, the template structure, and partial-save support for incomplete discussions. You can also save manually — the template is:
+Use `/brainstorm:brainstorm-save` to write the spec. The save sub-command handles file naming, the template structure, and partial-save support for incomplete discussions. You can also save manually — the template is:
 
 ```markdown
 # [Name] — Implementation Specification
@@ -111,17 +111,17 @@ Adjust depth per section — not every section needs to be long. Put detail wher
 | Command | Purpose |
 |---------|---------|
 | `/brainstorm` | Enter brainstorm mode (this skill) |
-| `/brainstorm:save` | Save the current discussion as a spec (final or partial checkpoint) |
-| `/brainstorm:end` | Exit brainstorm mode and resume normal agent behavior |
+| `/brainstorm:brainstorm-save` | Save the current discussion as a spec (final or partial checkpoint) |
+| `/brainstorm:brainstorm-end` | Exit brainstorm mode and resume normal agent behavior |
 
 Saving does NOT auto-exit. The user may want to refine the spec further after saving.
 
 ## Exiting Brainstorm Mode
 
-Use `/brainstorm:end`, or natural language: "退出头脑风暴"、"exit brainstorm"、"结束讨论"、or any clear intent to leave this mode. The end sub-command handles summarization and clean unload.
+Use `/brainstorm:brainstorm-end`, or natural language: "退出头脑风暴"、"exit brainstorm"、"结束讨论"、or any clear intent to leave this mode. The end sub-command handles summarization and clean unload.
 
 ## Multi-Session Support
 
 If the discussion spans multiple sessions or needs to pause:
-- Run `/brainstorm:save` to write a partial spec capturing progress so far
+- Run `/brainstorm:brainstorm-save` to write a partial spec capturing progress so far
 - The saved spec (with `## TODO` sections for open questions) serves as the starting point for the next session

@@ -105,6 +105,16 @@
       },
       "source": "./plugins/switch-workspace",
       "category": "productivity"
+    },
+    {
+      "name": "overleaf-local",
+      "description": "Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/overleaf-local",
+      "category": "productivity"
     }
   ]
 }

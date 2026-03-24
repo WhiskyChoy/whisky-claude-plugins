@@ -1,0 +1,119 @@
+---
+name: overleaf-local-setup
+description: Set up local Overleaf environment — install TeX distribution, clone via git bridge, detect LaTeX engine, analyze style files, collect user preferences. Invocable as /overleaf-local:overleaf-local-setup (Claude Code) or $overleaf-local-setup (Codex).
+user-invocable: true
+---
+
+# Setup: Local Overleaf Environment
+
+## 1. Prerequisite Detection & Installation
+
+**Detection order:**
+
+1. Check for `git` → if missing, offer install, exit if declined
+2. Check for TeX distribution:
+   - Look for `pdflatex`, `xelatex`, `lualatex` on PATH
+   - If found, detect distribution: `pdflatex --version` → "MiKTeX" or "TeX Live"
+   - If not found → offer installation
+3. Check available disk space before offering TeX installation
+
+**Storage-aware recommendation:**
+
+```
+You have X GB free.
+
+Option A — Incremental (MiKTeX): ~200 MB now, downloads packages on demand.
+            Best if disk is tight or you compile diverse projects.
+Option B — Pre-installed (TeX Live small): ~550 MB, covers most use cases.
+            Best for reliable offline builds.
+Option C — Full (TeX Live full): ~7.5 GB, everything included.
+            Best if you never want to think about missing packages.
+```
+
+**Platform-specific silent install commands:**
+
+| Platform | Default | Command |
+|----------|---------|---------|
+| Windows | MiKTeX | `winget install -e --id MiKTeX.MiKTeX --silent --accept-package-agreements --accept-source-agreements` |
+| macOS | TeX Live | `brew install --cask mactex-no-gui` |
+| Linux | TeX Live | `perl ./install-tl --no-interaction --scheme=small --no-doc-install --no-src-install` |
+
+**Post-install configuration:**
+
+- MiKTeX: `initexmf --admin --set-config-value="[MPM]AutoInstall=1"` (auto-install missing packages)
+- TeX Live (small): `tlmgr install latexmk biber biblatex` (commonly needed extras)
+
+**Hard gate:** If the user declines installation, exit with a clear message. Do not proceed with a broken environment.
+
+## 2. Overleaf Git Bridge Setup
+
+1. Explain that Overleaf git integration requires a paid/institutional plan. Ask user to confirm access.
+2. Collect Overleaf project URL (e.g., `https://git.overleaf.com/abc123def456`)
+3. Collect git authentication token — direct user to: Overleaf → Account Settings → Git Integration
+4. Credential storage preference:
+   - **Secure (recommended):** OS credential helper (`git credential-manager` on Windows, `osxkeychain` on macOS, `libsecret`/`store` on Linux)
+   - **Quick:** Store token in `.git/config` URL (`https://git:TOKEN@git.overleaf.com/...`)
+   - **Manual:** Ask every time
+5. Clone: `git clone <configured-url> .`
+6. Verify clone succeeded, show file listing
+
+## 3. Engine Auto-Detection
+
+Scan `.tex` files to select the LaTeX engine:
+
+| Signal | Engine |
+|--------|--------|
+| CJK characters (U+4E00–U+9FFF, U+3000–U+303F, etc.) | XeLaTeX |
+| `\usepackage{fontspec}` or `\usepackage{xeCJK}` or `\usepackage{ctex}` | XeLaTeX |
+| `\usepackage[T1]{fontenc}` + no CJK signals | pdfLaTeX |
+| `\directlua` or `\usepackage{luacode}` | LuaLaTeX |
+| Ambiguous or conflicting signals | Ask user |
+
+Default if no signals: **pdfLaTeX** (fastest, most compatible).
+
+## 4. Build System Detection
+
+Check for existing build config, in priority order:
+
+1. `latexmkrc` or `.latexmkrc` → use `latexmk`
+2. `Makefile` with LaTeX-related targets → use `make`
+3. `arara` directives in main `.tex` (`% arara:`) → use `arara`
+4. None found → direct engine invocation
+
+Direct invocation flags: always use `-interaction=nonstopmode` (don't stop on errors, log them) and `-halt-on-error` (stop after first fatal error).
+
+For bibliography: detect `\bibliography{}` → `bibtex`, `\addbibresource{}` → `biber`. Full build: engine → bib → engine → engine.
+
+## 5. Style File Analysis
+
+Detect `.cls` and `.sty` files:
+- Identify document class (`\documentclass{...}`)
+- Check for known classes (IEEE, ACM, Springer, Elsevier, LNCS, etc.)
+- Note constraints: column count, margin settings, font size restrictions
+- If class is unknown/custom: ask user about constraints
+
+Store results for the compile-fix phase (which layout tricks are legal).
+
+## 6. User Preference Collection
+
+Ask once during setup, store in project config:
+
+1. **Silent text modification?** — "When fixing compilation warnings, may I slightly reword sentences without asking each time? You can always review changes in the diff." (Yes = apply silently, show summary after; No = ask before each)
+2. **Parallel fix trials?** — "May I use subagents to try multiple layout fixes in parallel? Faster but uses more resources." (Yes = spawn subagents; No = sequential)
+3. **Credential storage mode?** — covered above
+
+## 7. Post-Setup Persistence
+
+Write project-specific configuration so future sessions inherit the setup:
+
+**For Claude Code** — append to project `CLAUDE.md`:
+```markdown
+## LaTeX Environment (auto-generated by overleaf-local)
+- Distribution: [detected distribution and version]
+- Engine: [detected engine]
+- Build command: [detected build command]
+- Document class: [detected class and constraints]
+- Overleaf remote: configured (git.overleaf.com)
+```
+
+**For Codex CLI** — append to `Agents.md` in project root, same content.

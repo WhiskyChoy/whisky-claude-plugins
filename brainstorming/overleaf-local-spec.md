@@ -34,18 +34,18 @@ A single Claude Code skill (`overleaf-local`) with sub-commands that covers the 
 
 ### Sub-Commands
 
-Each sub-command is a separate SKILL.md under `plugins/overleaf-local/skills/`. The directory name is short (for Claude Code's `<plugin>:<dir>` namespacing), while the SKILL.md `name` field is self-namespaced (for Codex's flat namespace).
+Each sub-command is a separate SKILL.md under `plugins/overleaf-local/skills/`. Directory names are **self-namespaced** (matching the `name` field) to prevent filesystem collisions when copied into Codex's flat `~/.codex/skills/` directory. This follows the [Codex skill-creator convention](https://github.com/openai/skills/blob/main/skills/.system/skill-creator/SKILL.md) where the folder name equals the skill name.
 
 | Directory | `name` field | Claude Code | Codex | Purpose |
 |-----------|-------------|-------------|-------|---------|
 | `skills/overleaf-local/` | `overleaf-local` | `/overleaf-local` | `$overleaf-local` | Main entry (context-aware routing) |
-| `skills/setup/` | `overleaf-local-setup` | `/overleaf-local:setup` | `$overleaf-local-setup` | Prerequisites, clone, engine detection, preferences |
-| `skills/compile/` | `overleaf-local-compile` | `/overleaf-local:compile` | `$overleaf-local-compile` | Run the compile-fix loop |
-| `skills/sync/` | `overleaf-local-sync` | `/overleaf-local:sync` | `$overleaf-local-sync` | Commit + pull --rebase + push to Overleaf |
-| `skills/pull/` | `overleaf-local-pull` | `/overleaf-local:pull` | `$overleaf-local-pull` | Pull from Overleaf only |
-| `skills/push/` | `overleaf-local-push` | `/overleaf-local:push` | `$overleaf-local-push` | Push to Overleaf only |
-| `skills/status/` | `overleaf-local-status` | `/overleaf-local:status` | `$overleaf-local-status` | Show workspace state |
-| `skills/lesson/` | `overleaf-local-lesson` | `/overleaf-local:lesson` | `$overleaf-local-lesson` | Manage lessons (save/list/search via argument) |
+| `skills/overleaf-local-setup/` | `overleaf-local-setup` | `/overleaf-local:overleaf-local-setup` | `$overleaf-local-setup` | Prerequisites, clone, engine detection, preferences |
+| `skills/overleaf-local-compile/` | `overleaf-local-compile` | `/overleaf-local:overleaf-local-compile` | `$overleaf-local-compile` | Run the compile-fix loop |
+| `skills/overleaf-local-sync/` | `overleaf-local-sync` | `/overleaf-local:overleaf-local-sync` | `$overleaf-local-sync` | Commit + pull --rebase + push to Overleaf |
+| `skills/overleaf-local-pull/` | `overleaf-local-pull` | `/overleaf-local:overleaf-local-pull` | `$overleaf-local-pull` | Pull from Overleaf only |
+| `skills/overleaf-local-push/` | `overleaf-local-push` | `/overleaf-local:overleaf-local-push` | `$overleaf-local-push` | Push to Overleaf only |
+| `skills/overleaf-local-status/` | `overleaf-local-status` | `/overleaf-local:overleaf-local-status` | `$overleaf-local-status` | Show workspace state |
+| `skills/overleaf-local-lesson/` | `overleaf-local-lesson` | `/overleaf-local:overleaf-local-lesson` | `$overleaf-local-lesson` | Manage lessons (save/list/search via argument) |
 
 The `lesson` sub-command uses an `arguments` field instead of splitting into three separate skills:
 
@@ -61,21 +61,22 @@ arguments:
 ```
 
 Invocation examples:
-- `/overleaf-local:lesson save` / `$overleaf-local-lesson save`
-- `/overleaf-local:lesson list` / `$overleaf-local-lesson list`
-- `/overleaf-local:lesson search "overfull hbox"` / `$overleaf-local-lesson search "overfull hbox"`
+- `/overleaf-local:overleaf-local-lesson save` / `$overleaf-local-lesson save`
+- `/overleaf-local:overleaf-local-lesson list` / `$overleaf-local-lesson list`
+- `/overleaf-local:overleaf-local-lesson search "overfull hbox"` / `$overleaf-local-lesson search "overfull hbox"`
 
 No sub-command + no task prompt → show status and offer the menu.
 No sub-command + task prompt (e.g., "read paper.pdf and help me write a review") → run SETUP if needed, then execute the task, then compile-fix.
 
 ### Cross-Platform Naming Convention
 
-This plugin follows the convention established in `brainstorm`:
-- **Directory name** = short identifier used by Claude Code's plugin namespace (`<plugin>:<dir>`)
-- **SKILL.md `name` field** = self-namespaced identifier used by Codex CLI (which has a flat skill namespace)
-- Both produce clear, unambiguous invocation names on each platform
+Directory names are **self-namespaced** — identical to the SKILL.md `name` field. This follows the [Codex skill-creator convention](https://github.com/openai/skills/blob/main/skills/.system/skill-creator/SKILL.md) where the folder name equals the skill name, and prevents filesystem collisions when skills from different plugins are copied into Codex's flat `~/.codex/skills/` directory.
 
-For Codex installation, copying the entire skills tree works because Codex scans `skills/**/SKILL.md` recursively:
+- **Directory name** = **`name` field** = `<plugin>-<sub>` (e.g., `overleaf-local-setup`)
+- **Claude Code:** `/<plugin>:<plugin>-<sub>` (e.g., `/overleaf-local:overleaf-local-setup`)
+- **Codex:** `$<plugin>-<sub>` (e.g., `$overleaf-local-setup`)
+
+For Codex installation, copy the skills tree directly — each directory name is globally unique:
 
 ```bash
 cp -r plugins/overleaf-local/skills/* ~/.codex/skills/

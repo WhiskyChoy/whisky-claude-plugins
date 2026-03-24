@@ -110,6 +110,13 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
         detail_body="${detail_body}\n**Options:**\n${options}\n"
       fi
     fi
+
+    if grep -q "## Sub-Commands" "$skill_md"; then
+      subcmds=$(sed -n '/^## Sub-Commands$/,/^## /{/^## Sub-Commands$/d;/^## /d;p}' "$skill_md")
+      if [ -n "$subcmds" ]; then
+        detail_body="${detail_body}\n**Sub-Commands:**\n${subcmds}\n"
+      fi
+    fi
   fi
 
   if [ -d "$plugin_dir/scripts" ]; then
