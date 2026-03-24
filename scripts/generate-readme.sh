@@ -25,8 +25,8 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 
 ## Plugins
 
-| Plugin | Version | Codex | Description |
-|--------|---------|-------|-------------|
+| Plugin | Version | Compatibility | Description |
+|--------|---------|---------------|-------------|
 HEADER
 
 # ── Build plugin table and detail sections ─────────────────────────────────
@@ -51,17 +51,41 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   ' "$MARKETPLACE")
   version="${version:-1.0.0}"
 
-  # Extract codex compatibility from plugin.json
-  codex_compat=$(grep -A1 '"codex"' "$plugin_json" 2>/dev/null | grep -o '"[^"]*"' | tail -1 | tr -d '"')
-  case "$codex_compat" in
-    full)    codex_badge="Yes" ;;
-    partial) codex_badge="Partial" ;;
-    none)    codex_badge="No" ;;
-    *)       codex_badge="—" ;;
-  esac
+  # Build compatibility string from platforms object in plugin.json
+  # Reads all key-value pairs under "platforms" and formats them
+  compat=""
+  in_platforms=0
+  while IFS= read -r line; do
+    if echo "$line" | grep -q '"platforms"'; then
+      in_platforms=1
+      continue
+    fi
+    if [ "$in_platforms" -eq 1 ]; then
+      if echo "$line" | grep -q '}'; then
+        break
+      fi
+      # Extract platform name and level
+      plat=$(echo "$line" | grep -o '"[^"]*"' | head -1 | tr -d '"')
+      level=$(echo "$line" | grep -o '"[^"]*"' | tail -1 | tr -d '"')
+      if [ -n "$plat" ] && [ -n "$level" ]; then
+        case "$level" in
+          full)    label="$plat" ;;
+          partial) label="$plat (partial)" ;;
+          none)    continue ;;  # skip platforms with no support
+          *)       label="$plat" ;;
+        esac
+        if [ -n "$compat" ]; then
+          compat="$compat, $label"
+        else
+          compat="$label"
+        fi
+      fi
+    fi
+  done < "$plugin_json"
+  compat="${compat:-—}"
 
   # Table row
-  echo "| **$name** | $version | $codex_badge | $desc |"
+  echo "| **$name** | $version | $compat | $desc |"
 
   # Install command
   install_cmds="${install_cmds}claude plugin install ${name}@whisky-claude-plugins
