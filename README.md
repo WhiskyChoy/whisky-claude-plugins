@@ -82,6 +82,8 @@ Minimal terminal statusline (directory, model, context bar). Setup recommends cl
 
 Generate draw.io diagrams as .drawio files, optionally export to PNG/SVG/PDF with embedded XML. Based on jgraph/drawio-mcp (Apache 2.0).
 
+**Bundled CLI tool:** `~/tools/drawio/`
+
 ### finalize-worktree
 
 Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.
