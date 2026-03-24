@@ -1,0 +1,32 @@
+{
+  "$comment": "Known providers for the frontend-slides capability. Checked in order; first available wins.",
+  "capability": "frontend-slides",
+  "description": "Create animation-rich HTML presentations from scratch or by converting PowerPoint files.",
+  "providers": [
+    {
+      "name": "frontend-slides (ECC built-in)",
+      "type": "ecc-skill",
+      "check": {
+        "method": "skill-file",
+        "path": "~/.claude/skills/frontend-slides/SKILL.md",
+        "expect_field": "origin",
+        "expect_value": "ECC"
+      },
+      "invoke": "Skill(\"frontend-slides\", \"<args>\")",
+      "notes": "Ships with Claude Code. Full-featured, actively maintained by Anthropic."
+    },
+    {
+      "name": "frontend-design (ECC built-in)",
+      "type": "ecc-skill",
+      "check": {
+        "method": "skill-file",
+        "path": "~/.claude/skills/frontend-design/SKILL.md",
+        "expect_field": "origin",
+        "expect_value": "ECC"
+      },
+      "invoke": "Skill(\"frontend-design\", \"<args>\")",
+      "notes": "Alternative ECC skill focused on general frontend design. Can produce slide-like output but not specialized for presentations."
+    }
+  ],
+  "fallback_guidance": "No provider found. To get this capability:\n1. Update Claude Code — the ECC frontend-slides skill ships with recent versions.\n2. Or install a compatible plugin that provides HTML slide generation."
+}

@@ -95,6 +95,16 @@
       },
       "source": "./plugins/drawio",
       "category": "productivity"
+    },
+    {
+      "name": "frontend-slides",
+      "description": "[Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin).",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/frontend-slides",
+      "category": "virtual"
     }
   ]
 }

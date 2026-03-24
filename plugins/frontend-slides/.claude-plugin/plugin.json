@@ -1,0 +1,7 @@
+{
+  "name": "frontend-slides",
+  "description": "[Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself.",
+  "author": {
+    "name": "whisky"
+  }
+}

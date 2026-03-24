@@ -18,6 +18,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **claude-statusline** | 1.0.0 | Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this. |
 | **drawio** | 1.0.0 | Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution. |
 | **finalize-worktree** | 1.0.0 | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
+| **frontend-slides** | 1.0.0 | [Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself. |
 | **lyria-audio** | 1.0.0 | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
 | **paper-to-slides** | 1.0.0 | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
@@ -31,6 +32,7 @@ claude plugin install cc0-audio@whisky-claude-plugins
 claude plugin install claude-statusline@whisky-claude-plugins
 claude plugin install drawio@whisky-claude-plugins
 claude plugin install finalize-worktree@whisky-claude-plugins
+claude plugin install frontend-slides@whisky-claude-plugins
 claude plugin install lyria-audio@whisky-claude-plugins
 claude plugin install overleaf-cleanup@whisky-claude-plugins
 claude plugin install paper-to-slides@whisky-claude-plugins
@@ -87,6 +89,10 @@ Generate draw.io diagrams as .drawio files with auto-detection and portable inst
 ### finalize-worktree
 
 Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.
+
+### frontend-slides
+
+[Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself.
 
 ### lyria-audio
 
