@@ -120,7 +120,7 @@ Adjust depth per section — not every section needs to be long. Put detail wher
 
 ## Exiting Brainstorm Mode
 
-When the user says "退出brainstorm"、"exit brainstorm"、"结束讨论"、or any clear intent to leave this mode:
+When the user says "退出头脑风暴"、"exit brainstorm"、"结束讨论"、or any clear intent to leave this mode:
 1. Summarize what was decided (one paragraph)
 2. State whether a spec was written (and where), or if the discussion is incomplete
 3. Resume normal coding agent behavior — all brainstorm-specific constraints no longer apply
