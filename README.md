@@ -84,8 +84,6 @@ Generate draw.io diagrams as .drawio files with auto-detection and portable inst
 
 **Bundled CLI tool:** `~/tools/drawio/`
 
-**Bundled CLI tool:** `~/tools/drawio/`
-
 ### finalize-worktree
 
 Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.
