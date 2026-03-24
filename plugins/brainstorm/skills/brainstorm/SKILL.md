@@ -18,7 +18,7 @@ Coding agents produce code faster than humans can comprehend it. This skill inve
 - Read files freely to inform discussion. Don't write production source code — but pseudocode, math notation, and small verification scripts are fine.
 - The scope is broad: algorithm design, data structure choices, system architecture, engineering tradeoffs, performance optimization, API design — anything that benefits from thinking before coding.
 - Use WebSearch to research prior art, existing solutions, and relevant literature — don't rely solely on training data.
-- The only persistent file you write is the final spec, saved to `brainstorming/` under the project root.
+- The only persistent file you write is the final spec, saved to `brainstorming/` under the project root (via `/brainstorm:save`).
 
 ## Comprehension Levels
 
@@ -71,37 +71,21 @@ At structured decision points (choosing between approaches, confirming convergen
 
 ### Phase 4: Specification Output
 
+Use `/brainstorm:save` to write the spec. The save sub-command handles file naming, the template structure, and partial-save support for incomplete discussions. You can also save manually — the template is:
+
 ```markdown
 # [Name] — Implementation Specification
 
 ## Problem Statement
-[What, why it's hard, constraints]
-
 ## Solution Overview
-[Core idea in 2-3 sentences]
-
 ## Algorithm / Design Description
-[Pseudocode, math notation, or architectural diagrams]
-[Invariants, loop structures, termination conditions, data flow]
-
 ## Data Structures
-[Key structures, properties, why chosen over alternatives]
-
 ## Interface Contract
-[Inputs, outputs, pre/postconditions, integration with existing modules]
-
 ## Design Decisions & Rationale
-[For each key choice: what was decided, what was rejected, why]
-
 ## Complexity Analysis
-
 ## Edge Cases and Boundary Conditions
-
 ## Verification Criteria
-[Mathematical properties, test scenarios, what failure looks like]
-
 ## Open Risks
-[Uncertainties flagged for implementation phase]
 ```
 
 Adjust depth per section — not every section needs to be long. Put detail where the real complexity lives.
@@ -122,22 +106,22 @@ Adjust depth per section — not every section needs to be long. Put detail wher
 4. **Respect domain expertise** — when user intuition conflicts with textbook, explore the tension rather than dismissing either.
 5. **The spec is the deliverable.** A good brainstorm makes coding almost mechanical.
 
+## Sub-Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/brainstorm` | Enter brainstorm mode (this skill) |
+| `/brainstorm:save` | Save the current discussion as a spec (final or partial checkpoint) |
+| `/brainstorm:end` | Exit brainstorm mode and resume normal agent behavior |
+
+Saving does NOT auto-exit. The user may want to refine the spec further after saving.
+
 ## Exiting Brainstorm Mode
 
-When the user says "退出头脑风暴"、"exit brainstorm"、"结束讨论"、or any clear intent to leave this mode:
-1. Summarize what was decided (one paragraph)
-2. State whether a spec was written (and where), or if the discussion is incomplete
-3. Resume normal coding agent behavior — all brainstorm-specific constraints no longer apply
-
-Writing the spec in Phase 4 does NOT auto-exit. The user may want to refine it further.
-
-**Clean unload (context recovery):**
-- Claude Code: suggest `/compact` to compress brainstorm instructions out of context
-- Other environments: suggest starting a new session, or note that brainstorm instructions will naturally fade as context fills with new work
+Use `/brainstorm:end`, or natural language: "退出头脑风暴"、"exit brainstorm"、"结束讨论"、or any clear intent to leave this mode. The end sub-command handles summarization and clean unload.
 
 ## Multi-Session Support
 
 If the discussion spans multiple sessions or needs to pause:
-- Write a partial spec capturing what's been decided so far
-- Mark open questions explicitly with `## TODO` sections
-- Next session can resume from the partial spec rather than restarting the discussion
+- Run `/brainstorm:save` to write a partial spec capturing progress so far
+- The saved spec (with `## TODO` sections for open questions) serves as the starting point for the next session

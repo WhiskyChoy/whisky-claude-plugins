@@ -89,3 +89,12 @@ A plugin must not depend on another plugin in this repo existing at install time
 ### Keep SKILL.md platform-agnostic where possible
 
 Use Claude Code tool names as the primary notation, reference `PLATFORM_COMPAT.md` for mapping, and avoid hardcoding paths like `~/.claude/skills/` in logic that other platforms need to follow.
+
+### Sub-command naming convention
+
+Plugins with multiple skills use short directory names and self-namespaced `name` fields:
+
+- **Directory:** `skills/<short>/` → Claude Code resolves as `<plugin>:<short>`
+- **`name` field:** `<plugin>-<short>` → Codex uses this in its flat namespace
+
+Example: `plugins/brainstorm/skills/end/SKILL.md` with `name: brainstorm-end` → `/brainstorm:end` (Claude Code), `$brainstorm-end` (Codex).
