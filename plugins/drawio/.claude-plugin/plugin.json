@@ -1,6 +1,6 @@
 {
   "name": "drawio",
-  "description": "Generate draw.io diagrams as .drawio files, optionally export to PNG/SVG/PDF with embedded XML. Based on jgraph/drawio-mcp (Apache 2.0).",
+  "description": "Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution.",
   "author": {
     "name": "whisky"
   }

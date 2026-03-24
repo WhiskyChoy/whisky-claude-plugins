@@ -16,7 +16,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **brainstorm** | 1.0.0 | Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code. |
 | **cc0-audio** | 1.0.0 | Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing. |
 | **claude-statusline** | 1.0.0 | Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this. |
-| **drawio** | 1.0.0 | Generate draw.io diagrams as .drawio files, optionally export to PNG/SVG/PDF with embedded XML. Based on jgraph/drawio-mcp (Apache 2.0). |
+| **drawio** | 1.0.0 | Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution. |
 | **finalize-worktree** | 1.0.0 | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
 | **lyria-audio** | 1.0.0 | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
@@ -80,7 +80,9 @@ Minimal terminal statusline (directory, model, context bar). Setup recommends cl
 
 ### drawio
 
-Generate draw.io diagrams as .drawio files, optionally export to PNG/SVG/PDF with embedded XML. Based on jgraph/drawio-mcp (Apache 2.0).
+Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution.
+
+**Bundled CLI tool:** `~/tools/drawio/`
 
 **Bundled CLI tool:** `~/tools/drawio/`
 
