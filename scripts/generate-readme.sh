@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Generate README.md from marketplace.json and plugin metadata.
+# Generate README.md from marketplace.json, plugin metadata, and partial files.
 # Called by GitHub Actions on push — output goes to stdout.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MARKETPLACE="$REPO_ROOT/.claude-plugin/marketplace.json"
+PARTIALS="$REPO_ROOT/scripts/partials"
 
 # ── Parse marketplace.json with portable tools (no jq dependency) ──────────
 
@@ -44,7 +45,6 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   desc=$(grep -o '"description": *"[^"]*"' "$plugin_json" | head -1 | sed 's/.*: *"//;s/"//')
 
   # Get version from marketplace.json for this plugin
-  # Use awk to find the plugin block and extract version
   version=$(awk -v pname="$name" '
     /"name":/ && $0 ~ "\"" pname "\"" { found=1 }
     found && /"version":/ { gsub(/.*"version": *"|".*/, ""); print; exit }
@@ -52,7 +52,6 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   version="${version:-1.0.0}"
 
   # Build compatibility string from platforms object in plugin.json
-  # Reads all key-value pairs under "platforms" and formats them
   compat=""
   in_platforms=0
   while IFS= read -r line; do
@@ -64,14 +63,13 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
       if echo "$line" | grep -q '}'; then
         break
       fi
-      # Extract platform name and level
       plat=$(echo "$line" | grep -o '"[^"]*"' | head -1 | tr -d '"')
       level=$(echo "$line" | grep -o '"[^"]*"' | tail -1 | tr -d '"')
       if [ -n "$plat" ] && [ -n "$level" ]; then
         case "$level" in
           full)    label="$plat" ;;
           partial) label="$plat (partial)" ;;
-          none)    continue ;;  # skip platforms with no support
+          none)    continue ;;
           *)       label="$plat" ;;
         esac
         if [ -n "$compat" ]; then
@@ -97,7 +95,6 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   detail_body=""
 
   if [ -n "$skill_md" ] && [ -f "$skill_md" ]; then
-    # Check if it has a Quick Reference section
     if grep -q "## Quick Reference" "$skill_md"; then
       quick_ref=$(sed -n '/^## Quick Reference$/,/^## /{/^## Quick Reference$/d;/^## /d;p}' "$skill_md")
       if [ -n "$quick_ref" ]; then
@@ -105,7 +102,6 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
       fi
     fi
 
-    # Check for Core Options table
     if grep -q "## Core Options" "$skill_md"; then
       options=$(sed -n '/^## Core Options$/,/^## /{/^## Core Options$/d;/^## /d;p}' "$skill_md")
       if [ -n "$options" ]; then
@@ -114,7 +110,6 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
     fi
   fi
 
-  # Check for scripts/ directory (like statusline)
   if [ -d "$plugin_dir/scripts" ]; then
     scripts=$(ls "$plugin_dir/scripts/" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
     if [ -n "$scripts" ]; then
@@ -122,12 +117,10 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
     fi
   fi
 
-  # Check for tools/ directory
   if [ -d "$plugin_dir/tools" ]; then
     detail_body="${detail_body}\n**Bundled CLI tool:** \`~/tools/${name}/\`\n"
   fi
 
-  # Build collapsible <details> block
   detail="<details>\n<summary><strong>${name}</strong> — ${desc}</summary>\n"
   if [ -n "$detail_body" ]; then
     detail="${detail}\n${detail_body}\n"
@@ -138,6 +131,8 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
 
   details="${details}\n$(echo -e "$detail")"
 done
+
+# ── Assemble output from partials and generated content ────────────────────
 
 cat <<SECTION
 
@@ -156,33 +151,25 @@ Or install individual plugins:
 $(echo "$install_cmds" | sed '/^$/d')
 \`\`\`
 
-### OpenAI Codex CLI
+SECTION
 
-This repo is organized as a Claude Code plugin marketplace, but each plugin's \`SKILL.md\` is compatible with Codex CLI. To use a skill in Codex:
+cat "$PARTIALS/codex-cli.md"
+echo ""
+cat "$PARTIALS/other-agents.md"
 
-\`\`\`bash
-# Copy the entire plugin directory (includes skills, tools, scripts, etc.)
-cp -r plugins/<name> ~/codex-plugins/<name>
-
-# Then symlink or copy just the skill into Codex's skill search path:
-# User-level (available in all projects)
-ln -s ~/codex-plugins/<name>/skills/<name> ~/.codex/skills/<name>
-
-# Project-level (committed to repo)
-cp -r plugins/<name>/skills/<name> .agents/skills/<name>
-\`\`\`
-
-Some plugins bundle runnable code alongside the skill (in \`tools/\`, \`scripts/\`, \`src/\`, etc.). The SKILL.md for each plugin documents how to locate and run its bundled code — check the skill's setup instructions for specifics.
-
-Skills marked **Partial** in the Compatibility column use Claude Code-specific tools. See [\`PLATFORM_COMPAT.md\`](PLATFORM_COMPAT.md) for the full tool mapping table (Claude Code → Codex → generic).
-
-### Other Agents
-
-The skills in this repo use SKILL.md files with YAML frontmatter (\`name\` + \`description\`) — a convention shared by Claude Code and Codex CLI. Other agents may be able to use them if they support a similar format, but compatibility is not guaranteed. See [\`PLATFORM_COMPAT.md\`](PLATFORM_COMPAT.md) for the tool mapping reference.
+cat <<SECTION
 
 ## Plugin Details
 $(echo -e "$details")
 ---
 
-*This README is auto-generated from plugin metadata. Do not edit manually.*
 SECTION
+
+cat "$PARTIALS/recommendations.md"
+
+cat <<FOOTER
+
+---
+
+*This README is auto-generated from plugin metadata. Do not edit manually.*
+FOOTER
