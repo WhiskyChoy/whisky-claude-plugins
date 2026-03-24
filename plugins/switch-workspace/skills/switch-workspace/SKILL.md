@@ -19,170 +19,78 @@ Migrate the current session so it can be resumed from a different working direct
 
 ## How It Works
 
-Claude Code stores sessions under `~/.claude/projects/<encoded-cwd>/`. This skill:
+Claude Code stores sessions under `~/.claude/projects/<encoded-cwd>/`. This skill copies the session file to a new project directory and gives the user a resume command.
 
-1. Copies the current session file to the target project directory
-2. Appends a context note about the directory change
-3. Gives the user a one-line command to resume there
+## Algorithm
 
-## Workflow
+### 1. Validate
 
-### Step 1: Validate Target
+Confirm `<target_path>` exists and is a directory. If not, ask the user.
 
-Verify the target directory exists:
+### 2. Locate Current Session
 
-```bash
-test -d "<target_path>" && echo "OK" || echo "NOT FOUND"
-```
+Session files are at `~/.claude/projects/<encoded-cwd>/<session-id>.jsonl`.
 
-If not found, ask the user to confirm or create it.
+**Encoding rule** — the directory name is the absolute path with separators replaced:
+- On Windows: `D:\GitProjects\foo` → `D--GitProjects-foo` (drop the colon, replace `\` with `-`)
+- On Unix: `/home/user/foo` → `-home-user-foo` (replace `/` with `-`)
 
-### Step 2: Resolve Paths
+Find the current project directory by encoding the current working directory, then find the most recently modified `.jsonl` inside it. Extract the session ID from the filename (strip `.jsonl`).
 
-Determine the current session ID from the environment. The session ID is available as a UUID — check the `sessionId` field. If not directly available, find the most recently modified `.jsonl` file in the current project directory:
+**Pitfall learned from testing:** Do NOT search for the most recent `.jsonl` globally across all project dirs — other sessions may be newer. Always scope to the current project's encoded directory.
 
-```bash
-# Encode current cwd: replace / with -- , remove leading -- , replace : with empty
-# On Windows (Git Bash), cwd like /d/GitProjects/foo becomes D--GitProjects-foo
-# On Unix, /home/user/foo becomes -home-user-foo (leading dash)
-CURRENT_CWD="$(pwd)"
+### 3. Encode Target Path
 
-# Determine the Claude projects base
-CLAUDE_PROJECTS="$HOME/.claude/projects"
+Apply the same encoding rule to `<target_path>` to get the target project directory name.
 
-# Find current project dir by encoding the cwd
-# The encoding rule: absolute path with separators replaced by -
-# Windows: D:\Git\foo → D--Git-foo  (backslash and colon removed)
-# Unix: /home/user/foo → -home-user-foo (forward slash → -)
-# But in Git Bash on Windows, pwd gives /d/GitProjects/foo
-# Claude Code encodes the WINDOWS path, so D:\GitProjects\foo → D--GitProjects-foo
+**Pitfall learned from testing:** On Windows with Git Bash, `pwd` gives Unix-style paths like `/d/GitProjects/foo`, but Claude Code encodes the Windows path `D:\GitProjects\foo`. Use `pwd -W` (Git Bash) or equivalent to get the native OS path before encoding. On Unix, `pwd` already gives the native path.
 
-# Easiest: just list project dirs and find the one matching cwd
-CURRENT_PROJECT_DIR=$(ls -d "$CLAUDE_PROJECTS"/*/ 2>/dev/null | while read d; do
-  dirname_base=$(basename "$d")
-  # Quick check: does the dir basename loosely match our cwd?
-  echo "$dirname_base"
-done | head -1)
-```
+### 4. Copy Session
 
-**Simpler approach** — just search for the most recent `.jsonl` across project dirs:
+- Create `~/.claude/projects/<target-encoded>/` if it doesn't exist
+- Copy the `.jsonl` file there
+- Copy the subagents directory (`<session-id>/`) if it exists alongside the JSONL
 
-```bash
-# Find the current session (most recently modified jsonl)
-CURRENT_JSONL=$(find "$CLAUDE_PROJECTS" -name "*.jsonl" -newer /tmp -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
-```
+### 5. Append Context Note
 
-On Windows (Git Bash) where `find -printf` may not work:
+Append one JSON line to the **copied** JSONL (not the original). It must be a valid message record:
 
-```bash
-CURRENT_JSONL=$(find "$CLAUDE_PROJECTS" -name "*.jsonl" -type f 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
-```
-
-Extract the session ID:
-
-```bash
-SESSION_ID=$(basename "$CURRENT_JSONL" .jsonl)
-CURRENT_PROJECT=$(basename "$(dirname "$CURRENT_JSONL")")
-```
-
-### Step 3: Encode Target Path
-
-Encode the target path into Claude Code's directory naming format:
-
-```bash
-# Convert target path to Claude's encoded format
-# Windows path: D:\GitProjects\foo → D--GitProjects-foo
-# Unix path: /home/user/foo → -home-user-foo
-encode_path() {
-  local p="$1"
-  # Normalize: resolve to absolute, remove trailing slash
-  p=$(cd "$p" && pwd -W 2>/dev/null || pwd)  # pwd -W gives Windows path on Git Bash
-  # Replace :\ or : with nothing (Windows drive letter)
-  p=$(echo "$p" | sed 's|:\\|/|g; s|:|/|g')
-  # Replace / with -
-  p=$(echo "$p" | sed 's|/|-|g')
-  # Replace -- sequences (from empty segments) — keep them as --
-  echo "$p"
+```json
+{
+  "parentUuid": "<uuid of the last record in the file>",
+  "isSidechain": false,
+  "type": "user",
+  "message": {
+    "role": "user",
+    "content": "[System note: This session was migrated from <source_path> to <target_path>. The working directory is now <target_path>. File paths from earlier in this conversation may reference <source_path> — adjust them to the new location as needed. The project context (CLAUDE.md, git status, etc.) now reflects <target_path>.]"
+  },
+  "uuid": "<new random uuid>",
+  "userType": "external",
+  "timestamp": "<current UTC timestamp in ISO 8601>"
 }
-
-TARGET_ENCODED=$(encode_path "<target_path>")
-TARGET_PROJECT_DIR="$CLAUDE_PROJECTS/$TARGET_ENCODED"
 ```
 
-### Step 4: Copy Session
+Use Python to read the last line's UUID and generate a new UUID — this is cross-platform and avoids shell escaping issues with JSON.
 
-```bash
-# Create target project directory
-mkdir -p "$TARGET_PROJECT_DIR"
+### 6. Tell the User
 
-# Copy the session JSONL
-cp "$CURRENT_JSONL" "$TARGET_PROJECT_DIR/"
+Print the session ID and the resume command. The user needs to:
+1. `/exit` the current session
+2. `cd` to the target directory
+3. Run `claude --resume <session-id> --fork-session`
 
-# Copy subagents directory if it exists
-if [ -d "$(dirname "$CURRENT_JSONL")/$SESSION_ID" ]; then
-  cp -r "$(dirname "$CURRENT_JSONL")/$SESSION_ID" "$TARGET_PROJECT_DIR/"
-fi
-```
-
-### Step 5: Append Context Note
-
-Append a user message to the copied JSONL that tells the model about the directory change:
-
-```bash
-# Get the last message UUID for parentUuid chaining
-LAST_UUID=$(python3 -c "
-import json, os
-p = os.path.join('$TARGET_PROJECT_DIR', '$SESSION_ID.jsonl')
-with open(p, encoding='utf-8') as f:
-    lines = f.readlines()
-last = json.loads(lines[-1])
-print(last.get('uuid', ''))
-" 2>/dev/null || echo "")
-
-# Generate a new UUID
-NEW_UUID=$(python3 -c "import uuid; print(uuid.uuid4())" 2>/dev/null || cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "00000000-0000-0000-0000-000000000000")
-
-# Append the context note
-cat >> "$TARGET_PROJECT_DIR/$SESSION_ID.jsonl" << JSONEOF
-{"parentUuid":"$LAST_UUID","isSidechain":false,"type":"user","message":{"role":"user","content":"[System note: This session was migrated from $CURRENT_CWD to <target_path>. The working directory is now <target_path>. File paths from earlier in this conversation may reference $CURRENT_CWD — adjust them to the new location as needed. The project context (CLAUDE.md, git status, etc.) now reflects <target_path>.]"},"uuid":"$NEW_UUID","userType":"external","timestamp":"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"}
-JSONEOF
-```
-
-### Step 6: Tell the User
-
-Print the one-liner for the user. Use the appropriate shell syntax based on platform:
-
-**Unix / macOS / Linux / Git Bash:**
-```
-Session prepared for <target_path>.
-
-To switch, run:
-  /exit
-  cd "<target_path>" && claude --resume <SESSION_ID> --fork-session
-```
-
-**PowerShell (if detected):**
-```
-Session prepared for <target_path>.
-
-To switch, run:
-  /exit
-  cd "<target_path>"; claude --resume <SESSION_ID> --fork-session
-```
-
-Use `--fork-session` to create a new session ID in the target workspace, avoiding conflicts with the original session.
+`--fork-session` creates a new session ID in the target workspace, avoiding conflicts with the original.
 
 ## Important Notes
 
-- **This is a best-effort migration.** Claude Code may change its internal storage format in future versions.
-- **Project-level memory** (`memory/` directory) is NOT copied — it belongs to the original project. The target workspace may have its own memory.
-- **CLAUDE.md context** will change — the resumed session will load the target directory's CLAUDE.md, not the original one.
-- **Git status** will reflect the target repo, not the source.
-- **`--fork-session`** is recommended to avoid duplicate session IDs across project directories.
-- The original session remains intact in the source project directory.
+- **Best-effort migration.** Claude Code may change its storage format in future versions.
+- **Project-level memory** (`memory/` directory) is NOT copied — it belongs to the original project.
+- **CLAUDE.md** will change — the resumed session loads the target directory's CLAUDE.md.
+- **Git status** will reflect the target repo.
+- The original session remains intact.
 
 ## Limitations
 
-- Only works with Claude Code CLI (not Codex or other agents)
-- Requires the session to be saved to disk (not using `--no-session-persistence`)
-- The `cwd` fields embedded in historical progress records will still reference the old path — this is cosmetic and doesn't affect behavior
+- Claude Code CLI only
+- Requires session persistence (not using `--no-session-persistence`)
+- Historical `cwd` fields in progress records still reference the old path (cosmetic only)
