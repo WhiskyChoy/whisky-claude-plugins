@@ -90,7 +90,9 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
 "
 
   # Detail section — extract info from SKILL.md if it exists
-  skill_md=$(find "$plugin_dir" -name "SKILL.md" -type f 2>/dev/null | head -1)
+  # Prefer the main skill (directory matching plugin name), fall back to any SKILL.md
+  skill_md="$plugin_dir/skills/$name/SKILL.md"
+  [ -f "$skill_md" ] || skill_md=$(find "$plugin_dir" -name "SKILL.md" -type f 2>/dev/null | head -1)
 
   detail_body=""
 
