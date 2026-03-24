@@ -103,6 +103,14 @@ Print the session ID and the resume command. The user needs to:
 
 `--fork-session` creates a new session ID in the target workspace, avoiding conflicts with the original.
 
+## Re-running / Overwriting
+
+Safe to re-run. The script copies a fresh snapshot of the source session each time, overwriting any previous copy in the target, then appends one context note. This means:
+
+- **Same source → same target again:** overwrites cleanly, no duplicate notes
+- **A → B, then B → C:** the migration chain is preserved (B's copy includes the A→B note, then a B→C note is appended — this is correct context)
+- **The original session is never modified**
+
 ## Important Notes
 
 - **Best-effort migration.** Claude Code may change its storage format in future versions.

@@ -190,6 +190,11 @@ def main() -> None:
     target_encoded = encode_path(target)
     target_project_dir = projects_dir / target_encoded
 
+    # Check if target already has this session
+    existing_target = target_project_dir / source_jsonl.name
+    if existing_target.is_file():
+        print(f"  Note: overwriting existing session in target (fresh copy from source)", file=sys.stderr)
+
     print(f"Copying session...", file=sys.stderr)
     target_jsonl = copy_session(source_jsonl, session_id, target_project_dir)
 
