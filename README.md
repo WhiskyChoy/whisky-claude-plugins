@@ -67,7 +67,7 @@ For plugins with bundled tools (e.g. `drawio`, `cc0-audio`), also copy the `tool
 cp -r plugins/<name>/tools ~/tools/<name>
 ```
 
-Skills marked **Partial** in the Compatibility column use Claude Code-specific tools (`Skill()`, `AskUserQuestion`, `Agent`) — Codex agents should map these to their equivalents (e.g. `$skill-name`, text prompts, sub-shells). The SKILL.md files for these plugins document the mapping.
+Skills marked **Partial** in the Compatibility column use Claude Code-specific tools. See [`PLATFORM_COMPAT.md`](PLATFORM_COMPAT.md) for the full tool mapping table (Claude Code → Codex → generic).
 
 ### Other Agents
 

@@ -34,15 +34,7 @@ Remove all files not referenced (directly or transitively) from the main `.tex` 
 
 ## Platform Compatibility
 
-This skill works with **Claude Code CLI** and **OpenAI Codex CLI**. See `paper-to-slides/SKILL.md → Platform Compatibility` for the full tool mapping table.
-
-**Script path** — determine once per session:
-```bash
-# Claude Code
-SKILL_DIR="$HOME/.claude/skills/overleaf-cleanup"
-# Codex — find dynamically
-SKILL_DIR="$(dirname "$(find ~ -path '*/overleaf-cleanup/SKILL.md' -maxdepth 5 2>/dev/null | head -1)")"
-```
+This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](../../../../PLATFORM_COMPAT.md) for the full cross-platform tool mapping and script path resolution.
 
 ## Workflow
 

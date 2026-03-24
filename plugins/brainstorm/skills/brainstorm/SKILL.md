@@ -5,6 +5,10 @@ description: Technical design discussion mode — Socratic dialogue for solving 
 
 # Brainstorm: Technical Design Discussion Mode
 
+## Platform Compatibility
+
+This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](../../../../PLATFORM_COMPAT.md) for the full cross-platform tool mapping.
+
 ## Core Principle
 
 Coding agents produce code faster than humans can comprehend it. This skill inverts the usual workflow: **raise the human's understanding first, code later.** The output — a specification document — makes subsequent coding fast (clear spec) and review fast (human already understands the design deeply).

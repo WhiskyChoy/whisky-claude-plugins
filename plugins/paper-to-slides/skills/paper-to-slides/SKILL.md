@@ -25,30 +25,9 @@ Convert one or more academic papers into a compelling HTML presentation. Reads e
 
 ## Platform Compatibility
 
-This skill works with **Claude Code CLI** and **OpenAI Codex CLI**. Instructions use Claude Code tool names; Codex agents should map as follows:
+This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](../../../../PLATFORM_COMPAT.md) for the full cross-platform tool mapping and script path resolution.
 
-| Action | Claude Code | Codex CLI |
-|--------|-------------|-----------|
-| Read files / PDFs | `Read` tool (native PDF + image support) | `cat` via shell; PDFs via `python -c "import pdfplumber; ..."` or `pdftotext` |
-| Edit files | `Edit` tool | `apply_patch` |
-| Write files | `Write` tool | `apply_patch` or shell redirect |
-| Search file names | `Glob` tool | `find` or `fd` via shell |
-| Search file content | `Grep` tool | `rg` or `grep` via shell |
-| Ask user a question | `AskUserQuestion` tool | Prompt the user in plain text |
-| Invoke another skill | `Skill("name", "args")` | `$name args` |
-| View images | `Read` tool (multimodal) | `view_image` tool or describe from context |
-
-**Script paths** — all persisted scripts live alongside this SKILL.md. Determine the directory at runtime:
-
-```bash
-# Claude Code
-SKILL_DIR="$HOME/.claude/skills/paper-to-slides"
-
-# Codex — find the skill directory dynamically
-SKILL_DIR="$(dirname "$(find ~ -path '*/paper-to-slides/SKILL.md' -maxdepth 5 2>/dev/null | head -1)")"
-```
-
-All script invocations below use `$SKILL_DIR` — set it once at the start of the session.
+All script invocations below use `$SKILL_DIR` — set it once at the start of the session per the instructions in `PLATFORM_COMPAT.md`.
 
 ## When to Activate
 
