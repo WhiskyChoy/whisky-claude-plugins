@@ -10,10 +10,11 @@ Generate draw.io diagrams as native `.drawio` files. Optionally export to PNG, S
 
 ## How to create a diagram
 
-1. **Generate draw.io XML** in mxGraphModel format for the requested diagram
-2. **Write the XML** to a `.drawio` file in the current working directory using the Write tool
-3. **If the user requested an export format** (png, svg, pdf), export using the draw.io CLI with `--embed-diagram`, then delete the source `.drawio` file
-4. **Open the result** — the exported file if exported, or the `.drawio` file otherwise
+1. **Ensure draw.io is available** — run `ensure_drawio.py` to detect or install the CLI (see "draw.io CLI" section below)
+2. **Generate draw.io XML** in mxGraphModel format for the requested diagram
+3. **Write the XML** to a `.drawio` file in the current working directory using the Write tool
+4. **If the user requested an export format** (png, svg, pdf), export using `$DRAWIO_BIN` with `--embed-diagram`, then delete the source `.drawio` file
+5. **Open the result** — the exported file if exported, or the `.drawio` file otherwise
 
 ## Choosing the output format
 
@@ -41,15 +42,29 @@ PNG, SVG, and PDF all support `--embed-diagram` — the exported file contains t
 
 The draw.io desktop app includes a command-line interface for exporting.
 
-### Locating the CLI
+### Ensuring draw.io is available
 
-Try `drawio` first (works if on PATH), then fall back to the platform-specific path:
+Before any export, run the bundled setup script to detect or install draw.io:
 
-- **macOS**: `/Applications/draw.io.app/Contents/MacOS/draw.io`
-- **Linux**: `drawio` (typically on PATH via snap/apt/flatpak)
-- **Windows**: `"D:\Program Files\draw.io\draw.io.exe"`
+```bash
+DRAWIO_TOOL_DIR="$(dirname "$(find ~/.claude -path '*/drawio/tools/ensure_drawio.py' -maxdepth 6 2>/dev/null | head -1)")"
+DRAWIO_BIN=$(python "$DRAWIO_TOOL_DIR/ensure_drawio.py")
+```
 
-Use `which drawio` (or `where drawio` on Windows) to check if it's on PATH before falling back.
+The script will:
+1. Check the managed install path (`~/.claude/tools/drawio/`), system PATH, and known locations
+2. If not found, ask the user which version to install (default: latest)
+3. Download the portable version (Windows zip, macOS zip, Linux AppImage) — no admin/sudo needed
+4. Print the resolved binary path to stdout
+
+Use `$DRAWIO_BIN` in all subsequent export commands.
+
+**Quick check (no install):**
+```bash
+python "$DRAWIO_TOOL_DIR/ensure_drawio.py" --check   # exit 0 if found, 1 if not
+python "$DRAWIO_TOOL_DIR/ensure_drawio.py" --version  # print installed version
+python "$DRAWIO_TOOL_DIR/ensure_drawio.py" --list     # list available releases
+```
 
 ### Export command
 
