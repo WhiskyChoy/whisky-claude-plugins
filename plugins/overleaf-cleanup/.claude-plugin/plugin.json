@@ -1,0 +1,7 @@
+{
+  "name": "overleaf-cleanup",
+  "description": "Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory.",
+  "author": {
+    "name": "whisky"
+  }
+}

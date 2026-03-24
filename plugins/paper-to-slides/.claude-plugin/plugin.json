@@ -1,0 +1,7 @@
+{
+  "name": "paper-to-slides",
+  "description": "Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.",
+  "author": {
+    "name": "whisky"
+  }
+}

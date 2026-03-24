@@ -55,6 +55,26 @@
       },
       "source": "./plugins/audio-preview",
       "category": "productivity"
+    },
+    {
+      "name": "paper-to-slides",
+      "description": "Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/paper-to-slides",
+      "category": "productivity"
+    },
+    {
+      "name": "overleaf-cleanup",
+      "description": "Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/overleaf-cleanup",
+      "category": "productivity"
     }
   ]
 }

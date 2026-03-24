@@ -17,6 +17,8 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **claude-statusline** | 1.0.0 | Custom terminal statusline showing directory, model, and context usage with a color-coded progress bar. |
 | **finalize-worktree** | 1.0.0 | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
 | **lyria-audio** | 1.0.0 | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
+| **overleaf-cleanup** | 1.0.0 | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
+| **paper-to-slides** | 1.0.0 | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
 
 ## Installing Plugins
 
@@ -26,6 +28,8 @@ claude plugin install cc0-audio@whisky-claude-plugins
 claude plugin install claude-statusline@whisky-claude-plugins
 claude plugin install finalize-worktree@whisky-claude-plugins
 claude plugin install lyria-audio@whisky-claude-plugins
+claude plugin install overleaf-cleanup@whisky-claude-plugins
+claude plugin install paper-to-slides@whisky-claude-plugins
 ```
 
 ## Plugin Details
@@ -99,6 +103,14 @@ AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles du
 | `--costs` | - | Show cost summary |
 
 **Bundled CLI tool:** `~/tools/lyria-audio/`
+
+### overleaf-cleanup
+
+Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory.
+
+### paper-to-slides
+
+Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.
 ---
 
 *This README is auto-generated from plugin metadata. Do not edit manually.*
