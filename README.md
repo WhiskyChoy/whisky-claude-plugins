@@ -1,6 +1,6 @@
 # whisky-claude-plugins
 
-Personal plugin marketplace by WhiskyChoy. Organized for Claude Code, with cross-platform SKILL.md compatibility (Codex CLI, and other agents).
+Personal plugin marketplace by WhiskyChoy. Organized for Claude Code, with partial cross-platform SKILL.md compatibility (e.g. Codex CLI).
 
 ## Installation
 
