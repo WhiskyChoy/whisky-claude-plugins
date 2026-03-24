@@ -41,4 +41,5 @@ Each plugin's `plugin.json` declares a `platforms` field:
 |-------|---------|
 | `full` | Works out of the box — uses only shell commands and standard tools |
 | `partial` | Works with tool mapping — uses Claude Code-specific tools listed above |
-| `none` | Platform-specific — depends on APIs only available in that platform |
+
+Only supported platforms are listed. If a platform is absent from `platforms`, the plugin does not support it.
