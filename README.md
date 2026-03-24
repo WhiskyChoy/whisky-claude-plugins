@@ -75,9 +75,9 @@ Any agent that reads SKILL.md files (with YAML frontmatter `name` + `description
 
 ## Plugin Details
 
-### audio-preview
+<details>
+<summary><strong>audio-preview</strong> — Zero-dependency local web server for comparing and picking audio files in a browser UI.</summary>
 
-Zero-dependency local web server for comparing and picking audio files in a browser UI.
 
 
 ```bash
@@ -88,13 +88,15 @@ audio-preview ./dir1/ ./dir2/ --port 9000   # Multiple dirs, custom port
 
 **Bundled CLI tool:** `~/tools/audio-preview/`
 
-### brainstorm
+</details>
+<details>
+<summary><strong>brainstorm</strong> — Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code.</summary>
 
-Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code.
+*No additional details.*
+</details>
+<details>
+<summary><strong>cc0-audio</strong> — Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing.</summary>
 
-### cc0-audio
-
-Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing.
 
 
 ```bash
@@ -109,33 +111,39 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 
 **Bundled CLI tool:** `~/tools/cc0-audio/`
 
-### claude-statusline
+</details>
+<details>
+<summary><strong>claude-statusline</strong> — Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this.</summary>
 
-Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this.
 
 **Scripts:** statusline.py,statusline.sh
 
-### drawio
+</details>
+<details>
+<summary><strong>drawio</strong> — Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution.</summary>
 
-Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution.
 
 **Bundled CLI tool:** `~/tools/drawio/`
 
-### finalize-worktree
+</details>
+<details>
+<summary><strong>finalize-worktree</strong> — Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.</summary>
 
-Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.
+*No additional details.*
+</details>
+<details>
+<summary><strong>frontend-slides</strong> — [Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself.</summary>
 
-### frontend-slides
+*No additional details.*
+</details>
+<details>
+<summary><strong>image-generation</strong> — [Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials.</summary>
 
-[Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself.
+*No additional details.*
+</details>
+<details>
+<summary><strong>lyria-audio</strong> — AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output.</summary>
 
-### image-generation
-
-[Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials.
-
-### lyria-audio
-
-AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output.
 
 
 - Command: `lyria "prompt" [options]`
@@ -163,13 +171,17 @@ AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles du
 
 **Bundled CLI tool:** `~/tools/lyria-audio/`
 
-### overleaf-cleanup
+</details>
+<details>
+<summary><strong>overleaf-cleanup</strong> — Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory.</summary>
 
-Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory.
+*No additional details.*
+</details>
+<details>
+<summary><strong>paper-to-slides</strong> — Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.</summary>
 
-### paper-to-slides
-
-Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.
+*No additional details.*
+</details>
 ---
 
 *This README is auto-generated from plugin metadata. Do not edit manually.*

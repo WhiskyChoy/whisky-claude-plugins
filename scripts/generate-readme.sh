@@ -94,15 +94,14 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   # Detail section — extract info from SKILL.md if it exists
   skill_md=$(find "$plugin_dir" -name "SKILL.md" -type f 2>/dev/null | head -1)
 
-  detail="### $name\n\n$desc\n"
+  detail_body=""
 
   if [ -n "$skill_md" ] && [ -f "$skill_md" ]; then
     # Check if it has a Quick Reference section
     if grep -q "## Quick Reference" "$skill_md"; then
-      # Extract Quick Reference content (between ## Quick Reference and next ##)
       quick_ref=$(sed -n '/^## Quick Reference$/,/^## /{/^## Quick Reference$/d;/^## /d;p}' "$skill_md")
       if [ -n "$quick_ref" ]; then
-        detail="${detail}\n${quick_ref}\n"
+        detail_body="${detail_body}\n${quick_ref}\n"
       fi
     fi
 
@@ -110,13 +109,8 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
     if grep -q "## Core Options" "$skill_md"; then
       options=$(sed -n '/^## Core Options$/,/^## /{/^## Core Options$/d;/^## /d;p}' "$skill_md")
       if [ -n "$options" ]; then
-        detail="${detail}\n**Options:**\n${options}\n"
+        detail_body="${detail_body}\n**Options:**\n${options}\n"
       fi
-    fi
-
-    # Check for Subcommands section
-    if grep -q "## Subcommands" "$skill_md" || grep -q "## Quick Reference" "$skill_md"; then
-      : # Already captured above
     fi
   fi
 
@@ -124,16 +118,25 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   if [ -d "$plugin_dir/scripts" ]; then
     scripts=$(ls "$plugin_dir/scripts/" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
     if [ -n "$scripts" ]; then
-      detail="${detail}\n**Scripts:** $scripts\n"
+      detail_body="${detail_body}\n**Scripts:** $scripts\n"
     fi
   fi
 
   # Check for tools/ directory
   if [ -d "$plugin_dir/tools" ]; then
-    detail="${detail}\n**Bundled CLI tool:** \`~/tools/${name}/\`\n"
+    detail_body="${detail_body}\n**Bundled CLI tool:** \`~/tools/${name}/\`\n"
   fi
 
-  details="${details}\n$(echo -e "$detail")\n"
+  # Build collapsible <details> block
+  detail="<details>\n<summary><strong>${name}</strong> — ${desc}</summary>\n"
+  if [ -n "$detail_body" ]; then
+    detail="${detail}\n${detail_body}\n"
+  else
+    detail="${detail}\n*No additional details.*\n"
+  fi
+  detail="${detail}</details>\n"
+
+  details="${details}\n$(echo -e "$detail")"
 done
 
 cat <<SECTION
