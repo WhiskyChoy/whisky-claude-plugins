@@ -140,9 +140,42 @@ cat <<SECTION
 
 ## Installing Plugins
 
+### Claude Code
+
+\`\`\`bash
+claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugins
+claude plugin install <name>@whisky-claude-plugins
+\`\`\`
+
+Or install individual plugins:
+
 \`\`\`bash
 $(echo "$install_cmds" | sed '/^$/d')
 \`\`\`
+
+### OpenAI Codex CLI
+
+This repo is organized as a Claude Code plugin marketplace, but each plugin's \`SKILL.md\` is compatible with Codex CLI. To use a skill in Codex, copy its skill directory to your Codex skills location:
+
+\`\`\`bash
+# User-level (available in all projects)
+cp -r plugins/<name>/skills/<name> ~/.codex/skills/<name>
+
+# Project-level (committed to repo)
+cp -r plugins/<name>/skills/<name> .agents/skills/<name>
+\`\`\`
+
+For plugins with bundled tools (e.g. \`drawio\`, \`cc0-audio\`), also copy the \`tools/\` directory:
+
+\`\`\`bash
+cp -r plugins/<name>/tools ~/tools/<name>
+\`\`\`
+
+Skills marked **Partial** in the Compatibility column use Claude Code-specific tools (\`Skill()\`, \`AskUserQuestion\`, \`Agent\`) — Codex agents should map these to their equivalents (e.g. \`\$skill-name\`, text prompts, sub-shells). The SKILL.md files for these plugins document the mapping.
+
+### Other Agents
+
+Any agent that reads SKILL.md files (with YAML frontmatter \`name\` + \`description\`) can use these skills. Copy the skill directory to your agent's skill search path.
 
 ## Plugin Details
 $(echo -e "$details")
