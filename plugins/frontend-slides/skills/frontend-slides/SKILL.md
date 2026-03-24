@@ -8,7 +8,7 @@ user-invocable: true
 
 ## Platform Compatibility
 
-This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](../../../../PLATFORM_COMPAT.md) for the full cross-platform tool mapping.
+This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](https://github.com/WhiskyChoy/whisky-claude-plugins/blob/master/PLATFORM_COMPAT.md) for the full cross-platform tool mapping.
 
 This is a **virtual skill** — it does not generate slides itself. It resolves to the best available provider and delegates.
 

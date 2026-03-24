@@ -25,7 +25,7 @@ Convert one or more academic papers into a compelling HTML presentation. Reads e
 
 ## Platform Compatibility
 
-This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](../../../../PLATFORM_COMPAT.md) for the full cross-platform tool mapping and script path resolution.
+This skill works with **Claude Code CLI**, **OpenAI Codex CLI**, and other SKILL.md-compatible agents. Instructions use Claude Code tool names — see [`PLATFORM_COMPAT.md`](https://github.com/WhiskyChoy/whisky-claude-plugins/blob/master/PLATFORM_COMPAT.md) for the full cross-platform tool mapping and script path resolution.
 
 All script invocations below use `$SKILL_DIR` — set it once at the start of the session per the instructions in `PLATFORM_COMPAT.md`.
 
