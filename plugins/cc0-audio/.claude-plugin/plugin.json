@@ -3,5 +3,9 @@
   "description": "Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing.",
   "author": {
     "name": "whisky"
+  },
+  "platforms": {
+    "claude-code": "full",
+    "codex": "full"
   }
 }

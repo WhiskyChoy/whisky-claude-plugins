@@ -10,19 +10,19 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 
 ## Plugins
 
-| Plugin | Version | Description |
-|--------|---------|-------------|
-| **audio-preview** | 1.0.0 | Zero-dependency local web server for comparing and picking audio files in a browser UI. |
-| **brainstorm** | 1.0.0 | Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code. |
-| **cc0-audio** | 1.0.0 | Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing. |
-| **claude-statusline** | 1.0.0 | Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this. |
-| **drawio** | 1.0.0 | Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution. |
-| **finalize-worktree** | 1.0.0 | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
-| **frontend-slides** | 1.0.0 | [Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself. |
-| **image-generation** | 1.0.0 | [Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials. |
-| **lyria-audio** | 1.0.0 | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
-| **overleaf-cleanup** | 1.0.0 | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
-| **paper-to-slides** | 1.0.0 | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
+| Plugin | Version | Codex | Description |
+|--------|---------|-------|-------------|
+| **audio-preview** | 1.0.0 | Yes | Zero-dependency local web server for comparing and picking audio files in a browser UI. |
+| **brainstorm** | 1.0.0 | Partial | Technical design discussion mode — Socratic dialogue for algorithm, architecture, and design decisions. Produces implementation specs, not code. |
+| **cc0-audio** | 1.0.0 | Yes | Search, download, and compress CC0/free-license audio from Freesound. Handles FFmpeg compression presets, URL checking, and batch processing. |
+| **claude-statusline** | 1.0.0 | No | Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this. |
+| **drawio** | 1.0.0 | Yes | Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution. |
+| **finalize-worktree** | 1.0.0 | Yes | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
+| **frontend-slides** | 1.0.0 | Partial | [Virtual] Resolves to the best available HTML slide generation provider (ECC built-in or compatible plugin). Does not implement the capability itself. |
+| **image-generation** | 1.0.0 | Yes | [Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials. |
+| **lyria-audio** | 1.0.0 | Yes | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
+| **overleaf-cleanup** | 1.0.0 | Partial | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
+| **paper-to-slides** | 1.0.0 | Partial | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
 
 ## Installing Plugins
 

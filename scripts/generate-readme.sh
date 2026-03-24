@@ -25,8 +25,8 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 
 ## Plugins
 
-| Plugin | Version | Description |
-|--------|---------|-------------|
+| Plugin | Version | Codex | Description |
+|--------|---------|-------|-------------|
 HEADER
 
 # ── Build plugin table and detail sections ─────────────────────────────────
@@ -51,8 +51,17 @@ for plugin_dir in "$REPO_ROOT"/plugins/*/; do
   ' "$MARKETPLACE")
   version="${version:-1.0.0}"
 
+  # Extract codex compatibility from plugin.json
+  codex_compat=$(grep -A1 '"codex"' "$plugin_json" 2>/dev/null | grep -o '"[^"]*"' | tail -1 | tr -d '"')
+  case "$codex_compat" in
+    full)    codex_badge="Yes" ;;
+    partial) codex_badge="Partial" ;;
+    none)    codex_badge="No" ;;
+    *)       codex_badge="—" ;;
+  esac
+
   # Table row
-  echo "| **$name** | $version | $desc |"
+  echo "| **$name** | $version | $codex_badge | $desc |"
 
   # Install command
   install_cmds="${install_cmds}claude plugin install ${name}@whisky-claude-plugins

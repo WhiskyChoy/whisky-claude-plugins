@@ -3,5 +3,9 @@
   "description": "Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree.",
   "author": {
     "name": "whisky"
+  },
+  "platforms": {
+    "claude-code": "full",
+    "codex": "full"
   }
 }

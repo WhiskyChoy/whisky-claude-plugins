@@ -3,5 +3,9 @@
   "description": "Minimal terminal statusline (directory, model, context bar). Setup recommends claude-hud for a full-featured alternative, then falls back to this.",
   "author": {
     "name": "whisky"
+  },
+  "platforms": {
+    "claude-code": "full",
+    "codex": "none"
   }
 }
