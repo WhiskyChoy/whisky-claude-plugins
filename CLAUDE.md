@@ -21,12 +21,12 @@ Optional subdirectories: `tools/`, `scripts/`, `src/`. Scripts that a SKILL.md r
 
 ### plugin.json
 
-```json
+```jsonc
 {
   "name": "<name>",
   "description": "<one-line>",
   "author": { "name": "whisky" },
-  "platforms": { "claude-code": "full"|"partial", "codex": "full"|"partial" }
+  "platforms": { "claude-code": "full", "codex": "partial" }  // "full" or "partial"
 }
 ```
 
