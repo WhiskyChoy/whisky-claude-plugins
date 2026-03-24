@@ -105,6 +105,16 @@
       },
       "source": "./plugins/frontend-slides",
       "category": "virtual"
+    },
+    {
+      "name": "image-generation",
+      "description": "[Virtual] Resolves to the best available AI image generation CLI (nano-banana, etc.). For game assets, sprites, UI mockups, and marketing materials.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/image-generation",
+      "category": "virtual"
     }
   ]
 }

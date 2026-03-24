@@ -1,0 +1,52 @@
+{
+  "$comment": "Known providers for the image-generation capability. Checked in order; first available wins.",
+  "capability": "image-generation",
+  "description": "AI image generation from text prompts. Supports resolution control, aspect ratios, reference images, transparent backgrounds, and cost tracking.",
+  "providers": [
+    {
+      "name": "nano-banana (Gemini Flash/Pro)",
+      "type": "external-cli",
+      "check": {
+        "method": "command",
+        "command": "nano-banana --help",
+        "fallback_paths": [
+          "~/tools/nano-banana-2/src/cli.ts"
+        ]
+      },
+      "install": {
+        "repo": "https://github.com/kingbootoshi/nano-banana-2-skill.git",
+        "runtime": "bun",
+        "steps": [
+          "git clone https://github.com/kingbootoshi/nano-banana-2-skill.git ~/tools/nano-banana-2",
+          "cd ~/tools/nano-banana-2 && bun install",
+          "cd ~/tools/nano-banana-2 && bun link"
+        ],
+        "api_key": {
+          "env_var": "GEMINI_API_KEY",
+          "config_file": "~/.nano-banana/.env",
+          "obtain_url": "https://aistudio.google.com/apikey"
+        },
+        "prerequisites": {
+          "bun": {
+            "check": "bun --version",
+            "install_macos_linux": "curl -fsSL https://bun.sh/install | bash",
+            "install_windows": "powershell -c \"irm bun.sh/install.ps1 | iex\""
+          }
+        }
+      },
+      "invoke": "nano-banana \"<prompt>\" [options]",
+      "capabilities": [
+        "text-to-image",
+        "reference-image",
+        "style-transfer",
+        "transparent-background",
+        "aspect-ratio",
+        "multi-resolution",
+        "cost-tracking"
+      ],
+      "notes": "Default model: Gemini 3.1 Flash (~$0.067/1K image). Pro available for highest quality (~$0.134/1K). Transparent backgrounds via green screen + FFmpeg (requires FFmpeg + ImageMagick).",
+      "license": "MIT"
+    }
+  ],
+  "fallback_guidance": "No image generation CLI found. Recommended provider:\n\n  nano-banana — AI image generation via Gemini Flash/Pro\n  https://github.com/kingbootoshi/nano-banana-2-skill\n\nRequires: Bun runtime + Gemini API key (free at aistudio.google.com/apikey).\nRun the setup steps in this skill's SKILL.md or say 'install nano-banana'."
+}
