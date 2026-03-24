@@ -20,7 +20,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **finalize-worktree** | 1.0.0 | claude-code, codex | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
 | **lyria-audio** | 1.0.0 | claude-code, codex | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | claude-code, codex (partial) | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
-| **overleaf-local** | 1.0.0 | claude-code (partial), codex (partial) | Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users. |
+| **overleaf-local** | 1.0.0 | claude-code, codex (partial) | Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users. |
 | **paper-to-slides** | 1.0.0 | claude-code, codex (partial) | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
 | **switch-workspace** | 1.0.0 | claude-code | Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume in the target workspace. |
 

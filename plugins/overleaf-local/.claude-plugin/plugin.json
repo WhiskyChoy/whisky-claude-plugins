@@ -5,7 +5,7 @@
     "name": "whisky"
   },
   "platforms": {
-    "claude-code": "partial",
+    "claude-code": "full",
     "codex": "partial"
   }
 }
