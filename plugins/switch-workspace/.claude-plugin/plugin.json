@@ -1,0 +1,11 @@
+{
+  "name": "switch-workspace",
+  "description": "Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume in the target workspace.",
+  "author": {
+    "name": "whisky"
+  },
+  "platforms": {
+    "claude-code": "full",
+    "codex": "none"
+  }
+}

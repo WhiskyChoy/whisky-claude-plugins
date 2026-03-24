@@ -23,6 +23,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **lyria-audio** | 1.0.0 | claude-code, codex | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
 | **overleaf-cleanup** | 1.0.0 | claude-code, codex (partial) | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
 | **paper-to-slides** | 1.0.0 | claude-code, codex (partial) | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
+| **switch-workspace** | 1.0.0 | claude-code | Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume in the target workspace. |
 
 ## Installing Plugins
 
@@ -47,6 +48,7 @@ claude plugin install image-generation@whisky-claude-plugins
 claude plugin install lyria-audio@whisky-claude-plugins
 claude plugin install overleaf-cleanup@whisky-claude-plugins
 claude plugin install paper-to-slides@whisky-claude-plugins
+claude plugin install switch-workspace@whisky-claude-plugins
 ```
 
 ### OpenAI Codex CLI
@@ -179,6 +181,11 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 </details>
 <details>
 <summary><strong>paper-to-slides</strong> — Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection.</summary>
+
+*No additional details.*
+</details>
+<details>
+<summary><strong>switch-workspace</strong> — Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume in the target workspace.</summary>
 
 *No additional details.*
 </details>

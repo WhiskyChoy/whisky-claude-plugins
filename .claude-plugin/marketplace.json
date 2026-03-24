@@ -115,6 +115,16 @@
       },
       "source": "./plugins/image-generation",
       "category": "virtual"
+    },
+    {
+      "name": "switch-workspace",
+      "description": "Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume there.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/switch-workspace",
+      "category": "productivity"
     }
   ]
 }
