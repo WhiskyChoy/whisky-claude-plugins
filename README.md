@@ -73,7 +73,7 @@ Skills marked **Partial** in the Compatibility column use Claude Code-specific t
 
 ### Other Agents
 
-Any agent that reads SKILL.md files (with YAML frontmatter `name` + `description`) can use these skills. Copy the skill directory to your agent's skill search path.
+The skills in this repo use SKILL.md files with YAML frontmatter (`name` + `description`) — a convention shared by Claude Code and Codex CLI. Other agents may be able to use them if they support a similar format, but compatibility is not guaranteed. See [`PLATFORM_COMPAT.md`](PLATFORM_COMPAT.md) for the tool mapping reference.
 
 ## Plugin Details
 
