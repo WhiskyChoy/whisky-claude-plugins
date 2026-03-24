@@ -3,6 +3,8 @@
 
 Usage:
     python switch_workspace.py <target_path> [--session-id <uuid>]
+    python switch_workspace.py --list          # list recent workspaces
+    python switch_workspace.py                 # interactive: pick from recent workspaces
 
 If --session-id is not provided, uses the most recently modified session
 in the current project directory.
@@ -49,6 +51,49 @@ def encode_path(p: Path) -> str:
         s = s.replace("/", "-")
 
     return s
+
+
+def decode_path(encoded: str) -> str:
+    """Best-effort decode of an encoded project directory name back to a path.
+
+    This is lossy — D--GitProjects-foo could be D:\\GitProjects\\foo or
+    D:\\GitProjects-foo. We use heuristics: if it starts with a capital
+    letter followed by --, it's likely a Windows drive letter.
+    """
+    s = encoded
+    if len(s) >= 3 and s[0].isalpha() and s[1:3] == "--":
+        # Windows: D--GitProjects-foo → D:\GitProjects\foo
+        drive = s[0]
+        rest = s[3:].replace("-", "\\")
+        return f"{drive}:\\{rest}"
+    elif s.startswith("-"):
+        # Unix: -home-user-foo → /home/user/foo
+        return s.replace("-", "/")
+    else:
+        return s.replace("-", "/")
+
+
+def list_workspaces(projects_dir: Path, exclude_encoded: str | None = None) -> list[tuple[str, str, float]]:
+    """List known workspaces sorted by most recent session activity.
+
+    Returns list of (encoded_name, decoded_path, latest_mtime).
+    """
+    workspaces = []
+    for d in projects_dir.iterdir():
+        if not d.is_dir() or d.name == "memory":
+            continue
+        if exclude_encoded and d.name == exclude_encoded:
+            continue
+        # Find most recent jsonl
+        jsonl_files = list(d.glob("*.jsonl"))
+        if not jsonl_files:
+            continue
+        latest_mtime = max(f.stat().st_mtime for f in jsonl_files)
+        decoded = decode_path(d.name)
+        workspaces.append((d.name, decoded, latest_mtime))
+
+    workspaces.sort(key=lambda x: x[2], reverse=True)
+    return workspaces
 
 
 def find_current_project_dir(projects_dir: Path, cwd: Path) -> Path | None:
@@ -148,12 +193,64 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Migrate a Claude Code session to a different working directory."
     )
-    parser.add_argument("target_path", help="Absolute path to the target directory")
+    parser.add_argument("target_path", nargs="?", default=None,
+                        help="Absolute path to the target directory. If omitted, shows interactive picker.")
     parser.add_argument("--session-id", help="Session ID (UUID). Auto-detected if omitted.")
     parser.add_argument("--cwd", help="Override current working directory for source lookup.")
+    parser.add_argument("--list", action="store_true", help="List recent workspaces and exit.")
     args = parser.parse_args()
 
-    target = Path(args.target_path).resolve()
+    source_cwd = Path(args.cwd).resolve() if args.cwd else Path.cwd()
+    projects_dir = get_claude_projects_dir()
+    current_encoded = encode_path(source_cwd)
+
+    # --list mode: just print workspaces
+    if args.list:
+        workspaces = list_workspaces(projects_dir)
+        if not workspaces:
+            print("No workspaces found.", file=sys.stderr)
+            sys.exit(0)
+        for encoded, decoded, mtime in workspaces:
+            marker = " (current)" if encoded == current_encoded else ""
+            ts = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+            print(f"  {decoded}{marker}  [{ts}]", file=sys.stderr)
+        sys.exit(0)
+
+    # Interactive picker if no target given
+    if args.target_path is None:
+        workspaces = list_workspaces(projects_dir, exclude_encoded=current_encoded)
+        if not workspaces:
+            print("No other workspaces found.", file=sys.stderr)
+            sys.exit(1)
+        print("Recent workspaces:", file=sys.stderr)
+        for i, (encoded, decoded, mtime) in enumerate(workspaces):
+            ts = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+            print(f"  [{i + 1}] {decoded}  [{ts}]", file=sys.stderr)
+        print(f"  [0] Enter a custom path", file=sys.stderr)
+        try:
+            raw = input(f"  Choice [1-{len(workspaces)}, 0 for custom]: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print(file=sys.stderr)
+            sys.exit(1)
+        if raw == "0" or raw == "":
+            try:
+                custom = input("  Path: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print(file=sys.stderr)
+                sys.exit(1)
+            target = Path(custom).resolve()
+        else:
+            try:
+                idx = int(raw) - 1
+                if not (0 <= idx < len(workspaces)):
+                    raise ValueError
+            except ValueError:
+                print("Invalid choice.", file=sys.stderr)
+                sys.exit(1)
+            target = Path(workspaces[idx][1]).resolve()
+    else:
+        target = Path(args.target_path).resolve()
+
     if not target.is_dir():
         print(f"Error: target directory does not exist: {target}", file=sys.stderr)
         sys.exit(1)

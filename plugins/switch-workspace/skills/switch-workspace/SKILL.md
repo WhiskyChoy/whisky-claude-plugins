@@ -4,8 +4,8 @@ description: Prepare a session for resuming in a different working directory. Co
 user-invocable: true
 arguments:
   - name: target_path
-    description: "Absolute path to the target working directory"
-    required: true
+    description: "Absolute path to the target working directory. If not provided, list recent workspaces for the user to pick from."
+    required: false
 ---
 
 # Switch Workspace
@@ -45,9 +45,15 @@ If the script is not available, follow the algorithm below manually.
 
 ## Algorithm
 
-### 1. Validate
+### 1. Resolve Target
 
-Confirm `<target_path>` exists and is a directory. If not, ask the user.
+**If `target_path` is provided:** confirm it exists and is a directory. If not, ask the user.
+
+**If `target_path` is NOT provided:** list recent workspaces for the user to pick from.
+
+The encoded project directory names under `~/.claude/projects/` can be decoded back to real paths by reversing the encoding rule (see step 2). List them sorted by most recent session activity (newest `.jsonl` modification time), exclude the current workspace, and present as a numbered list. Let the user pick one, or type a custom path.
+
+The script supports this via `--list` flag, or automatically when no target is given.
 
 ### 2. Locate Current Session
 
