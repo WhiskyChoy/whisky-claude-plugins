@@ -187,7 +187,9 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 <details>
 <summary><strong>switch-workspace</strong> — Prepare a session for resuming in a different working directory. Copies session state and gives the user a one-line command to exit and resume in the target workspace.</summary>
 
-*No additional details.*
+
+**Bundled CLI tool:** `~/tools/switch-workspace/`
+
 </details>
 ---
 
