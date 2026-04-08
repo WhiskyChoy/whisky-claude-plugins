@@ -1,0 +1,11 @@
+{
+  "name": "meeting-assist",
+  "description": "Meeting recording pipeline — audio extraction, speech transcription with speaker diarization (FunASR), and AI-powered meeting minutes generation.",
+  "author": {
+    "name": "whisky"
+  },
+  "platforms": {
+    "claude-code": "full",
+    "codex": "partial"
+  }
+}

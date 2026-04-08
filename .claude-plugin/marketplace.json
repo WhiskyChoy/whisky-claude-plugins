@@ -115,6 +115,16 @@
       },
       "source": "./plugins/overleaf-local",
       "category": "productivity"
+    },
+    {
+      "name": "meeting-assist",
+      "description": "Meeting recording pipeline — audio extraction, speech transcription with speaker diarization (FunASR), and AI-powered meeting minutes generation.",
+      "version": "1.0.0",
+      "author": {
+        "name": "whisky"
+      },
+      "source": "./plugins/meeting-assist",
+      "category": "productivity"
     }
   ]
 }

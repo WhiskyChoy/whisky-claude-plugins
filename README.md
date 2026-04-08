@@ -19,6 +19,7 @@ claude plugin marketplace add https://github.com/WhiskyChoy/whisky-claude-plugin
 | **drawio** | 1.0.0 | claude-code, codex | Generate draw.io diagrams as .drawio files with auto-detection and portable install of the draw.io CLI. Exports to PNG/SVG/PDF with embedded XML. See NOTICE for upstream attribution. |
 | **finalize-worktree** | 1.0.0 | claude-code, codex | Commit all worktree changes, sync from main branch, run tests, and merge back. Use when done working in a git worktree. |
 | **lyria-audio** | 1.0.0 | claude-code, codex | AI music generation CLI powered by Gemini Lyria (realtime streaming). Handles duration, BPM, brightness, density, scale, and MP3/WAV output. |
+| **meeting-assist** | 1.0.0 | claude-code, codex (partial) | Meeting recording pipeline — audio extraction, speech transcription with speaker diarization (FunASR), and AI-powered meeting minutes generation. |
 | **overleaf-cleanup** | 1.0.0 | claude-code, codex (partial) | Clean LaTeX/Overleaf projects by removing unused files based on dependency analysis from the main .tex entry point. Accepts a zip file or an existing directory. |
 | **overleaf-local** | 1.0.0 | claude-code, codex (partial) | Local Overleaf workflow — git clone, LaTeX compilation, iterative compile-fix loop, and bidirectional sync. Targets non-technical users. |
 | **paper-to-slides** | 1.0.0 | claude-code, codex (partial) | Convert academic papers (PDF, LaTeX, Overleaf) into polished HTML presentations with PPTX/PDF export. Supports multiple papers, style templates, screen-aware sizing, and logo injection. |
@@ -43,6 +44,7 @@ claude plugin install claude-statusline@whisky-claude-plugins
 claude plugin install drawio@whisky-claude-plugins
 claude plugin install finalize-worktree@whisky-claude-plugins
 claude plugin install lyria-audio@whisky-claude-plugins
+claude plugin install meeting-assist@whisky-claude-plugins
 claude plugin install overleaf-cleanup@whisky-claude-plugins
 claude plugin install overleaf-local@whisky-claude-plugins
 claude plugin install paper-to-slides@whisky-claude-plugins
@@ -193,6 +195,22 @@ cc0-audio batch manifest.json                 # Batch search + download + compre
 | `--costs` | - | Show cost summary |
 
 **Bundled CLI tool:** `~/tools/lyria-audio/`
+
+</details>
+<details>
+<summary><strong>meeting-assist</strong> — Meeting recording pipeline — audio extraction, speech transcription with speaker diarization (FunASR), and AI-powered meeting minutes generation.</summary>
+
+
+**Sub-Commands:**
+
+| Command | Purpose |
+|---------|---------|
+| `/meeting-assist` | Full pipeline (convert → transcribe → correct → summarize) |
+| `/meeting-assist:meeting-assist-convert` | Extract and normalize audio from raw recordings |
+| `/meeting-assist:meeting-assist-transcribe` | Transcribe audio with FunASR (speaker diarization) |
+| `/meeting-assist:meeting-assist-correct` | Correct transcription errors + predict speaker identities |
+| `/meeting-assist:meeting-assist-summarize` | Generate structured meeting minutes from transcripts |
+| `/meeting-assist:meeting-assist-search` | Search and Q&A across all meetings |
 
 </details>
 <details>
