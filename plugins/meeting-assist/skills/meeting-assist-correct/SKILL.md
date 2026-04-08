@@ -35,10 +35,51 @@ Respond in the user's language (detect from their messages). The correction data
 
 ## Design Principles
 
-1. **Respect user's review capacity** — glossary table ≤ 50 rows, corrections table ≤ 20 rows
+1. **Balance coverage and review effort** — table size adapts to meeting length and error density (see sizing formula below)
 2. **Two-layer review** — global glossary (must review, 1-2 min) + per-line corrections (optional)
 3. **AI predicts, user confirms** — speaker identities are pre-filled, user just edits wrong ones
 4. **Unfilled = skip** — any row with empty or `？` in the correction column is not applied
+
+## Table sizing
+
+Table sizes adapt to three factors: **meeting scale** (longer meetings produce more errors), **actual error density** (some recordings are cleaner than others), and **human review budget** (diminishing returns beyond a threshold).
+
+### Glossary sizing
+
+```
+base = segments / 200        # ~1 row per 200 segments (scales with meeting length)
+cap  = min(base × 2, 80)     # hard cap at 80 rows (beyond this, review fatigue outweighs value)
+floor = 10                    # minimum to catch key terms even in short meetings
+
+glossary_rows = clamp(actual_unique_terms, floor, cap)
+```
+
+| Meeting length | Segments | Base | Typical range |
+|---------------|----------|------|---------------|
+| 15 min        | ~300     | ~2   | 10-15 rows    |
+| 1 hour        | ~1200    | ~6   | 10-25 rows    |
+| 3 hours       | ~5700    | ~29  | 20-60 rows    |
+
+If the analysis produces more unique terms than `cap`, prioritize by: count descending → person names always included → low-count terms dropped first.
+
+### Corrections sizing
+
+```
+base = segments / 300        # ~1 correction per 300 segments
+cap  = min(base × 2, 40)     # hard cap at 40 rows
+floor = 5
+
+corrections_rows = clamp(actual_corrections_above_threshold, floor, cap)
+```
+
+Only include corrections with confidence ≥ 0.8. If more candidates than `cap`, sort by confidence descending and truncate.
+
+### Confidence threshold
+
+Not all analysis results should reach the user. Apply a minimum confidence threshold:
+- **Glossary terms**: include if count ≥ 2 OR confidence ≥ 0.9 (single-occurrence high-confidence terms are OK)
+- **Corrections**: include only if confidence ≥ 0.8
+- **Speaker predictions**: always include (user must review all speakers regardless of confidence)
 
 ## Prerequisites
 
@@ -326,7 +367,7 @@ After all agents complete, aggregate their outputs:
 1. **Merge term tables** — deduplicate, sum counts, keep best example
 2. **Merge speaker analyses** — combine clues from all chunks per speaker, resolve conflicts
 3. **Predict speaker identities** — from all collected clues (names heard, self-introductions, role signals)
-4. **Rank one-off corrections** — sort by confidence, keep top 20
+4. **Rank one-off corrections** — sort by confidence, apply sizing formula below
 
 ### Step 3: Generate Review Files
 
@@ -353,7 +394,7 @@ Sort speakers by segment count (most active first). Skip speakers with < 5 segme
 
 #### 3b. Global Glossary Table (`_glossary.xlsx`)
 
-XLSX with formatted headers (blue header row, color-coded categories, freeze panes, auto-filter). Requires `openpyxl`. Aim for 10-30 rows:
+XLSX with formatted headers (blue header row, color-coded categories, freeze panes, auto-filter). Requires `openpyxl`. Size determined by the sizing formula below:
 
 ```
 类型	原文（可能多种写法）	修正为	出现次数	示例上下文
@@ -365,7 +406,7 @@ For `说话人` rows: put predicted identity in "修正为" column with "(预测
 
 #### 3c. Per-line Corrections Table (`_corrections.xlsx`)
 
-XLSX with same formatting as glossary. Strictly ≤ 20 rows:
+XLSX with same formatting as glossary. Size determined by the sizing formula below:
 
 ```
 时间戳	说话人	原文片段	修正为	原因
