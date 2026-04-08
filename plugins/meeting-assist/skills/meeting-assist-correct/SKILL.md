@@ -42,44 +42,57 @@ Respond in the user's language (detect from their messages). The correction data
 
 ## Table sizing
 
-Table sizes adapt to three factors: **meeting scale** (longer meetings produce more errors), **actual error density** (some recordings are cleaner than others), and **human review budget** (diminishing returns beyond a threshold).
+Table sizes adapt to three factors:
+1. **Meeting scale** — longer meetings produce more errors
+2. **Actual error density** — some recordings are cleaner than others
+3. **Human review budget** — research shows review quality drops after 60-90 min of continuous review; at ~5 sec/row, that's roughly 100-150 rows before fatigue degrades judgment
 
 ### Glossary sizing
 
 ```
-base = segments / 200        # ~1 row per 200 segments (scales with meeting length)
-cap  = min(base × 2, 80)     # hard cap at 80 rows (beyond this, review fatigue outweighs value)
-floor = 10                    # minimum to catch key terms even in short meetings
-
-glossary_rows = clamp(actual_unique_terms, floor, cap)
+raw   = actual unique terms found by analysis (no artificial limit here)
+min   = 10                    # below this, likely missed errors
+max   = 150                   # ~12 min review at 5s/row; beyond this, fatigue risk
+target = clamp(raw, min, max)
 ```
 
-| Meeting length | Segments | Base | Typical range |
-|---------------|----------|------|---------------|
-| 15 min        | ~300     | ~2   | 10-15 rows    |
-| 1 hour        | ~1200    | ~6   | 10-25 rows    |
-| 3 hours       | ~5700    | ~29  | 20-60 rows    |
+When `raw > max`, prioritize:
+1. Person names — always include (speaker identity is critical)
+2. High count terms — sort descending, these affect the most text
+3. High confidence terms — ≥ 0.9 confidence even if low count
+4. Drop the rest with a note: "N additional low-frequency terms omitted; Haiku sweep will catch residuals"
 
-If the analysis produces more unique terms than `cap`, prioritize by: count descending → person names always included → low-count terms dropped first.
+| Meeting length | Segments | Typical glossary |
+|---------------|----------|-----------------|
+| 15 min        | ~300     | 10-20 rows      |
+| 1 hour        | ~1200    | 15-40 rows      |
+| 3 hours       | ~5700    | 30-80 rows      |
+| 6 hours       | ~12000   | 50-150 rows     |
 
 ### Corrections sizing
 
 ```
-base = segments / 300        # ~1 correction per 300 segments
-cap  = min(base × 2, 40)     # hard cap at 40 rows
-floor = 5
-
-corrections_rows = clamp(actual_corrections_above_threshold, floor, cap)
+raw   = actual corrections with confidence ≥ 0.8
+min   = 5                     # even clean recordings have a few one-off errors
+max   = 80                    # ~7 min review at 5s/row
+target = clamp(raw, min, max)
 ```
 
-Only include corrections with confidence ≥ 0.8. If more candidates than `cap`, sort by confidence descending and truncate.
+When `raw > max`, sort by confidence descending, keep top `max`. Omitted corrections are logged for the Haiku sweep to attempt automatically.
 
-### Confidence threshold
+### Confidence thresholds
 
-Not all analysis results should reach the user. Apply a minimum confidence threshold:
-- **Glossary terms**: include if count ≥ 2 OR confidence ≥ 0.9 (single-occurrence high-confidence terms are OK)
+Not all analysis results should reach the user:
+- **Glossary terms**: include if count ≥ 2 OR confidence ≥ 0.9 (single-occurrence high-confidence terms OK)
 - **Corrections**: include only if confidence ≥ 0.8
-- **Speaker predictions**: always include (user must review all speakers regardless of confidence)
+- **Speaker predictions**: always include (user must review all speakers)
+
+### When to skip user review entirely
+
+For very short meetings (< 100 segments / ~5 min), the overhead of generating and reviewing XLSX may exceed the value. In this case:
+- Skip glossary/corrections XLSX generation
+- Apply only speaker mapping (still requires user confirmation)
+- Let the Haiku sweep handle residual errors automatically
 
 ## Prerequisites
 
