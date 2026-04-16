@@ -466,25 +466,16 @@ For dual versions, export each separately. Use `--width 10 --height 7.5` for 4:3
 
 ##### PDF Export
 
-Use the snapshot script to produce high-resolution slide images, then combine into a PDF:
+One-shot: snapshot every slide and stitch into a single PDF.
 
 ```bash
-SNAP_SCRIPT="$SKILL_DIR/snapshot_slides.py"
-python "$SNAP_SCRIPT" "<slides.html>" --output-dir "<output_dir>/pdf_frames" --scale 2 --format png
+PDF_SCRIPT="$SKILL_DIR/html_to_pdf.py"
+python "$PDF_SCRIPT" "<slides.html>" --output "<output_dir>/slides.pdf" --scale 2
 ```
 
-Then combine the PNGs into a single PDF using Pillow:
+The script calls the template's `showSlide(n)` (and falls back to a counter regex) so each PDF page shows the correct "N / total" — this is what makes page counters update, rather than freezing on "1 / N". Nav buttons (`.nav-bar`, `.nav-btn`) are hidden; the counter stays visible.
 
-```python
-from PIL import Image
-from pathlib import Path
-
-frames = sorted(Path("<output_dir>/pdf_frames").glob("slide_*.png"))
-images = [Image.open(f).convert("RGB") for f in frames]
-images[0].save("<slides.pdf>", save_all=True, append_images=images[1:], resolution=150)
-```
-
-For dual versions, export each separately.
+Use `--keep-frames` to retain the intermediate PNGs (e.g. for a PPTX picture-per-slide deck). For dual versions, export each separately.
 
 #### Step 15: Supplemental Materials Merge
 
@@ -536,7 +527,8 @@ All scripts live in the same directory as this SKILL.md (on Claude Code: `~/.cla
 | `inject_logo.py` | Batch logo injection (CSS + elements) | `python ... <slides.html> <logo.png> [--position top-right]` |
 | `diff_supplement.py` | **Auxiliary.** Content extraction (--extract-only) for LLM semantic comparison. Legacy syntactic diff available but unreliable. | `python ... <slides.html> <supp...> --extract-only -o <content.json>` |
 | `audit_space.py` | DOM-based content fill audit, flags sparse slides, captures screenshots to `_space_audit/` | `python ... <slides.html> [--threshold 0.55] [--no-screenshots] [--slides 1-5,8]` |
-| `snapshot_slides.py` | Headless slide screenshots (Playwright) | `python ... <slides.html> -o <dir> [--scale 2] [--slides 1-5,8]` |
+| `snapshot_slides.py` | Headless slide screenshots (Playwright). Activates each slide and syncs page counters (`.slide-counter`, `.page-number`, `#slideCounter` …) so every frame shows the right "N / total". | `python ... <slides.html> -o <dir> [--scale 2] [--slides 1-5,8]` |
+| `html_to_pdf.py` | One-shot HTML → PDF: snapshot + Pillow stitch in one step. Uses `snapshot_slides.py` under the hood so page counters update per page. | `python ... <slides.html> [-o <slides.pdf>] [--scale 2] [--keep-frames]` |
 | `inline_assets.py` | Embed images/CSS as base64 for single-file HTML | `python ... <slides.html> [-o <standalone.html>]` |
 
 ## Execution Procedure

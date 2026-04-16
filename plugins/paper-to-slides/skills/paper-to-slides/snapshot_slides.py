@@ -49,11 +49,15 @@ ensure_playwright()
 
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-# CSS injected before capture to hide UI overlays
+# CSS injected before capture to hide UI overlays.
+# NOTE: we deliberately do NOT hide .slide-counter / .page-number / .pagination /
+# [class*="page"] patterns here — the counter is useful on a printed page
+# (readers need to know "slide 3 / 25"), and the JS below keeps it in sync.
 HIDE_UI_CSS = """
 .progress, .progress-bar,
 .controls, .navigate, [class*="nav-arrow"],
 .cursor, .slide-nav,
+.nav-btn, [class*="nav-btn"],
 .toolbar, [class*="toolbar"],
 .ui-overlay, [class*="control-bar"] {
     display: none !important;
@@ -207,19 +211,28 @@ def snapshot_slides(
                 if requested_slides and slide_num not in requested_slides:
                     continue
 
-                # Activate this slide, deactivate all others, force reveal-items visible
+                # Activate this slide, deactivate all others, force reveal-items visible,
+                # and — crucially — sync page counters / progress bars so each frame
+                # shows the correct "N / total". Templates typically expose showSlide(n)
+                # to update the counter; we call it when present and fall back to a
+                # regex-based DOM update for templates that don't.
                 page.evaluate(f"""(() => {{
+                    const i = {i};
+                    const slideNum = {slide_num};
                     const slides = document.querySelectorAll(
                         'section.slide, div.slide, section[data-slide]'
                     );
                     if (slides.length === 0) return;
+                    const total = slides.length;
+
+                    // 1. Direct DOM state — works for any template (opacity-based or .active-based)
                     slides.forEach((s, idx) => {{
-                        s.classList.toggle('active', idx === {i});
-                        s.style.opacity = idx === {i} ? '1' : '0';
-                        s.style.pointerEvents = idx === {i} ? 'auto' : 'none';
-                        s.style.zIndex = idx === {i} ? '10' : '0';
+                        s.classList.toggle('active', idx === i);
+                        s.style.opacity = idx === i ? '1' : '0';
+                        s.style.pointerEvents = idx === i ? 'auto' : 'none';
+                        s.style.zIndex = idx === i ? '10' : '0';
                     }});
-                    const active = slides[{i}];
+                    const active = slides[i];
                     if (active) {{
                         active.querySelectorAll('.reveal-item').forEach(el => {{
                             el.style.opacity = '1';
@@ -227,6 +240,37 @@ def snapshot_slides(
                             el.style.transition = 'none';
                         }});
                     }}
+
+                    // 2. Template-native nav (also updates counter/progress via its own logic)
+                    try {{
+                        if (typeof window.showSlide === 'function') window.showSlide(slideNum);
+                        else if (typeof window.goToSlide === 'function') window.goToSlide(slideNum);
+                        else if (window.Reveal && typeof Reveal.slide === 'function') Reveal.slide(slideNum - 1);
+                    }} catch (e) {{ /* swallow — fallback below will still run */ }}
+
+                    // 3. Fallback counter update — scoped to elements that actually look like
+                    //    slide counters, gated on the denominator matching total so we never
+                    //    rewrite unrelated "Step 1 of 3"-style text on the slide itself.
+                    const counterSel = [
+                        '.slide-counter', '.slide-count', '.slide-number', '.slide-num',
+                        '.page-number', '.page-num', '.page-counter', '.pagination',
+                        '[data-slide-counter]', '[data-page-num]',
+                        '[id*="slideCounter"]', '[id*="pageNum"]', '[id*="pageCounter"]'
+                    ].join(', ');
+                    document.querySelectorAll(counterSel).forEach(el => {{
+                        const text = (el.textContent || '').trim();
+                        const m = text.match(/^(.*?)(\\d+)(\\s*(?:\\/|of|\\|)\\s*)(\\d+)(.*)$/i);
+                        if (m && parseInt(m[4], 10) === total) {{
+                            el.textContent = m[1] + slideNum + m[3] + m[4] + m[5];
+                        }}
+                    }});
+
+                    // 4. Progress bar width (visible bars only — hidden ones are masked by CSS)
+                    document.querySelectorAll(
+                        '.progress-bar, [class*="progress-bar"], [data-progress-bar]'
+                    ).forEach(el => {{
+                        el.style.width = ((slideNum / total) * 100) + '%';
+                    }});
                 }})()""")
 
                 page.wait_for_timeout(300)
